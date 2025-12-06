@@ -3,6 +3,9 @@ import Link from "next/link";
 import { getPostBySlug, getAllPostSlugs } from "@/lib/posts";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
+// Allow dynamic rendering for new posts
+export const dynamicParams = true;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
