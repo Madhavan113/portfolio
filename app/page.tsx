@@ -9,9 +9,6 @@ export default function Home() {
         <p>
           My interests include game theory, international relations, distributed systems, multi-agent RL, inference, prediction markets, and poker.
         </p>
-        <p>
-          I should point out: I don&apos;t think Baudrillard is smart, actually, I think every moral philosopher is wrong.
-        </p>
       </section>
 
       {/* Quote Block */}
@@ -23,6 +20,10 @@ export default function Home() {
           </footer>
         </blockquote>
       </section>
+
+      <p>
+        I should point out: I don&apos;t think Baudrillard is smart, actually, I think every moral philosopher is wrong.
+      </p>
     </div>
     
   );
