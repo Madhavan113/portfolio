@@ -4,10 +4,13 @@ export default function Home() {
       {/* Intro Section */}
       <section className="space-y-6">
         <p>
-          I&apos;m currently exploring how to make better decisions under uncertainty.
+          I&apos;m trying to understand how to make better decisions under uncertainty.
         </p>
         <p>
           My interests include game theory, international relations, distributed systems, multi-agent RL, inference, prediction markets, and poker.
+        </p>
+        <p>
+          I should point out: I don&apos;t think Baudrillard is smart—actually, I think every moral philosopher is wrong.
         </p>
       </section>
 
@@ -21,6 +24,7 @@ export default function Home() {
         </blockquote>
       </section>
     </div>
+    
   );
 }
 
