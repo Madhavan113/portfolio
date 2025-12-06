@@ -1,0 +1,26 @@
+export default function Home() {
+  return (
+    <div className="space-y-8">
+      {/* Intro Section */}
+      <section className="space-y-6">
+        <p>
+          I&apos;m currently exploring how to make better decisions under uncertainty.
+        </p>
+        <p>
+          My interests include game theory, international relations, distributed systems, multi-agent RL, inference, prediction markets, and poker.
+        </p>
+      </section>
+
+      {/* Quote Block */}
+      <section className="mt-16 flex justify-center">
+        <blockquote className="border-l-2 border-charcoal pl-8 max-w-md">
+          <p className="italic">&ldquo;The map precedes the territory.&rdquo;</p>
+          <footer className="mt-4 text-sm">
+            — Jean Baudrillard
+          </footer>
+        </blockquote>
+      </section>
+    </div>
+  );
+}
+
