@@ -10,7 +10,7 @@ export default function Home() {
           My interests include game theory, international relations, distributed systems, multi-agent RL, inference, prediction markets, and poker.
         </p>
         <p>
-          I should point out: I don&apos;t think Baudrillard is smart—actually, I think every moral philosopher is wrong.
+          I should point out: I don&apos;t think Baudrillard is smart, actually, I think every moral philosopher is wrong.
         </p>
       </section>
 
