@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { put } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 
 // Never cache tracking
 export const dynamic = "force-dynamic";
