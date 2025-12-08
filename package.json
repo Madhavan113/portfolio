@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analytics": "node scripts/dump-analytics.mjs",
+    "dashboard": "node scripts/local-dashboard.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^2.0.0",
