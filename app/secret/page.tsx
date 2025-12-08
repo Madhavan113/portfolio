@@ -38,12 +38,24 @@ export default function SecretPage() {
   const [loading, setLoading] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
 
   useEffect(() => {
     document.title = "Personal Photos";
   }, []);
+
+  // Live update every 30 seconds when on dashboard
+  useEffect(() => {
+    if (stage !== "dashboard") return;
+
+    const interval = setInterval(() => {
+      fetchAnalytics();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [stage]);
 
   // Initialize map when leaflet is loaded and we have visits
   useEffect(() => {
@@ -99,7 +111,7 @@ export default function SecretPage() {
   };
 
   const fetchAnalytics = async () => {
-    setLoading(true);
+    if (visits.length === 0) setLoading(true);
     try {
       const res = await fetch("/api/secret-data", {
         method: "POST",
@@ -109,6 +121,7 @@ export default function SecretPage() {
       if (res.ok) {
         const data = await res.json();
         setVisits(data.visits || []);
+        setLastUpdate(new Date());
       }
     } catch (e) {
       console.error(e);
@@ -206,7 +219,14 @@ export default function SecretPage() {
 
       <div className="space-y-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">📊 Analytics</h1>
+          <div>
+            <h1 className="text-2xl font-bold">Analytics</h1>
+            {lastUpdate && (
+              <p className="text-sm text-[var(--color-gold)]">
+                Updated {lastUpdate.toLocaleTimeString()} · Auto-refreshes every 30s
+              </p>
+            )}
+          </div>
           <button
             onClick={() => {
               setStage("password");
