@@ -44,13 +44,13 @@ export default function SecretPage() {
     document.title = "Personal Photos";
   }, []);
 
-  // Live update every 5 seconds when on dashboard
+  // Live update every 30 seconds when on dashboard (seamless background refresh)
   useEffect(() => {
     if (stage !== "dashboard" || !authToken) return;
 
     const interval = setInterval(() => {
-      fetchAnalytics();
-    }, 5000);
+      fetchAnalytics(true); // true = background refresh
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [stage, authToken]);
@@ -135,9 +135,10 @@ export default function SecretPage() {
     }
   };
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (isBackgroundRefresh = false) => {
     if (!authToken) return;
-    if (visits.length === 0) setLoading(true);
+    // Only show loading on initial load, not background refreshes
+    if (!isBackgroundRefresh && visits.length === 0) setLoading(true);
     
     try {
       const res = await fetch("/api/secret-data", {
@@ -152,9 +153,10 @@ export default function SecretPage() {
         setLastUpdate(new Date());
       }
     } catch (e) {
-      console.error(e);
+      // Silently fail on background refresh
+      if (!isBackgroundRefresh) console.error(e);
     }
-    setLoading(false);
+    if (!isBackgroundRefresh) setLoading(false);
   };
 
   const countryStats = visits.reduce((acc, v) => {
@@ -251,7 +253,7 @@ export default function SecretPage() {
             <h1 className="text-2xl font-bold">Analytics</h1>
             {lastUpdate && (
               <p className="text-sm text-[var(--color-gold)]">
-                Updated {lastUpdate.toLocaleTimeString()} · Auto-refreshes every 5s
+                Updated {lastUpdate.toLocaleTimeString()} · Auto-refreshes every 30s
               </p>
             )}
           </div>
