@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
+import Tracker from "@/components/Tracker";
 
 export const metadata: Metadata = {
   title: "Madhavan Prasanna",
@@ -30,6 +31,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="min-h-screen">
+        <Tracker />
         <Header />
         <main className="max-w-2xl mx-auto px-6 py-12">
           {children}
