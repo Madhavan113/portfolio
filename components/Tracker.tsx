@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-export default function Tracker() {
+function TrackerInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -51,6 +51,13 @@ export default function Tracker() {
     track();
   }, [pathname, searchParams]);
 
-  return null; // This component doesn't render anything
+  return null;
 }
 
+export default function Tracker() {
+  return (
+    <Suspense fallback={null}>
+      <TrackerInner />
+    </Suspense>
+  );
+}
