@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Script from "next/script";
 
 interface Visit {
   timestamp: string;
@@ -25,7 +26,6 @@ interface Visit {
   } | null;
 }
 
-// Change these to your own values
 const CORRECT_PASSWORD = process.env.NEXT_PUBLIC_SECRET_PASSWORD || "madhavan2025";
 const SECURITY_ANSWER = process.env.NEXT_PUBLIC_SECURITY_ANSWER || "chess";
 
@@ -37,11 +37,45 @@ export default function SecretPage() {
   const [visits, setVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
 
-  // Set fake title
   useEffect(() => {
     document.title = "Personal Photos";
   }, []);
+
+  // Initialize map when leaflet is loaded and we have visits
+  useEffect(() => {
+    if (leafletLoaded && visits.length > 0 && mapRef.current && !mapInstanceRef.current) {
+      const L = (window as any).L;
+      if (!L) return;
+
+      const map = L.map(mapRef.current).setView([20, 0], 2);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        attribution: "© OpenStreetMap contributors © CARTO",
+      }).addTo(map);
+
+      visits.forEach((v) => {
+        if (v.location?.lat && v.location?.lon) {
+          L.circleMarker([v.location.lat, v.location.lon], {
+            radius: 6,
+            fillColor: "#8B7355",
+            color: "#2D2A26",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8,
+          })
+            .bindPopup(
+              `<b>${v.location.city}, ${v.location.country}</b><br>${v.page}<br><small>${new Date(v.timestamp).toLocaleString()}</small>`
+            )
+            .addTo(map);
+        }
+      });
+
+      mapInstanceRef.current = map;
+    }
+  }, [leafletLoaded, visits]);
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,10 +104,7 @@ export default function SecretPage() {
       const res = await fetch("/api/secret-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          p: CORRECT_PASSWORD, 
-          s: SECURITY_ANSWER 
-        }),
+        body: JSON.stringify({ p: CORRECT_PASSWORD, s: SECURITY_ANSWER }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -85,7 +116,6 @@ export default function SecretPage() {
     setLoading(false);
   };
 
-  // Stats calculations
   const countryStats = visits.reduce((acc, v) => {
     const country = v.location?.country || "Unknown";
     acc[country] = (acc[country] || 0) + 1;
@@ -105,31 +135,29 @@ export default function SecretPage() {
     return acc;
   }, {} as Record<string, number>);
 
-  // Password stage - looks like a photos login
+  // Password stage
   if (stage === "password") {
     return (
-      <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
-          <h1 className="text-xl font-semibold text-stone-800 mb-2">📸 Personal Photos</h1>
-          <p className="text-stone-500 text-sm mb-6">Enter password to view private album</p>
-          <form onSubmit={handlePasswordSubmit}>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full p-3 border border-stone-300 rounded-lg mb-3 text-stone-800"
-              autoFocus
-            />
-            {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-            <button
-              type="submit"
-              className="w-full p-3 bg-stone-800 text-white rounded-lg hover:bg-stone-700"
-            >
-              Continue
-            </button>
-          </form>
-        </div>
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">📸 Personal Photos</h1>
+        <p className="text-[var(--color-gold)]">Enter password to view private album</p>
+        <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-sm">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="w-full p-3 border-2 border-[var(--color-charcoal)] bg-transparent rounded"
+            autoFocus
+          />
+          {error && <p className="text-red-600">{error}</p>}
+          <button
+            type="submit"
+            className="w-full p-3 bg-[var(--color-charcoal)] text-[var(--color-cream)] rounded hover:bg-[var(--color-gold)] transition-colors"
+          >
+            Continue
+          </button>
+        </form>
       </div>
     );
   }
@@ -137,44 +165,56 @@ export default function SecretPage() {
   // Security question stage
   if (stage === "security") {
     return (
-      <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
-          <h1 className="text-xl font-semibold text-stone-800 mb-2">🔐 Security Check</h1>
-          <p className="text-stone-500 text-sm mb-6">Answer your security question</p>
-          <form onSubmit={handleSecuritySubmit}>
-            <label className="block text-sm text-stone-600 mb-2">
-              What game did you play competitively as a kid?
-            </label>
-            <input
-              type="text"
-              value={securityAnswer}
-              onChange={(e) => setSecurityAnswer(e.target.value)}
-              placeholder="Your answer"
-              className="w-full p-3 border border-stone-300 rounded-lg mb-3 text-stone-800"
-              autoFocus
-            />
-            {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-            <button
-              type="submit"
-              className="w-full p-3 bg-stone-800 text-white rounded-lg hover:bg-stone-700"
-            >
-              Access Photos
-            </button>
-          </form>
-        </div>
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">🔐 Security Check</h1>
+        <p className="text-[var(--color-gold)]">Answer your security question</p>
+        <form onSubmit={handleSecuritySubmit} className="space-y-4 max-w-sm">
+          <label className="block text-sm">
+            What game did you play competitively as a kid?
+          </label>
+          <input
+            type="text"
+            value={securityAnswer}
+            onChange={(e) => setSecurityAnswer(e.target.value)}
+            placeholder="Your answer"
+            className="w-full p-3 border-2 border-[var(--color-charcoal)] bg-transparent rounded"
+            autoFocus
+          />
+          {error && <p className="text-red-600">{error}</p>}
+          <button
+            type="submit"
+            className="w-full p-3 bg-[var(--color-charcoal)] text-[var(--color-cream)] rounded hover:bg-[var(--color-gold)] transition-colors"
+          >
+            Access Photos
+          </button>
+        </form>
       </div>
     );
   }
 
-  // Dashboard stage
+  // Dashboard
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">📊 Analytics Dashboard</h1>
+    <>
+      <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      />
+      <Script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        onLoad={() => setLeafletLoaded(true)}
+      />
+
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">📊 Analytics</h1>
           <button
-            onClick={() => { setStage("password"); setPassword(""); setSecurityAnswer(""); }}
-            className="text-zinc-400 hover:text-white text-sm"
+            onClick={() => {
+              setStage("password");
+              setPassword("");
+              setSecurityAnswer("");
+              mapInstanceRef.current = null;
+            }}
+            className="text-[var(--color-gold)] hover:text-[var(--color-charcoal)]"
           >
             Lock
           </button>
@@ -184,107 +224,98 @@ export default function SecretPage() {
           <p>Loading analytics...</p>
         ) : (
           <>
-            {/* Stats Grid */}
-            <div className="grid grid-cols-4 gap-4 mb-8">
-              <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-                <p className="text-zinc-400 text-sm">Total Visits</p>
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-4">
+              <div className="border-2 border-[var(--color-charcoal)] p-4 rounded">
+                <p className="text-sm text-[var(--color-gold)]">Total Visits</p>
                 <p className="text-3xl font-bold">{visits.length}</p>
               </div>
-              <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-                <p className="text-zinc-400 text-sm">Countries</p>
+              <div className="border-2 border-[var(--color-charcoal)] p-4 rounded">
+                <p className="text-sm text-[var(--color-gold)]">Countries</p>
                 <p className="text-3xl font-bold">{Object.keys(countryStats).length}</p>
               </div>
-              <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-                <p className="text-zinc-400 text-sm">Cities</p>
+              <div className="border-2 border-[var(--color-charcoal)] p-4 rounded">
+                <p className="text-sm text-[var(--color-gold)]">Cities</p>
                 <p className="text-3xl font-bold">{Object.keys(cityStats).length}</p>
               </div>
-              <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-                <p className="text-zinc-400 text-sm">Pages</p>
+              <div className="border-2 border-[var(--color-charcoal)] p-4 rounded">
+                <p className="text-sm text-[var(--color-gold)]">Pages</p>
                 <p className="text-3xl font-bold">{Object.keys(pageStats).length}</p>
               </div>
             </div>
 
+            {/* Map */}
+            <div
+              ref={mapRef}
+              className="h-80 rounded border-2 border-[var(--color-charcoal)]"
+              style={{ background: "#e8e4dc" }}
+            />
+
             {/* Panels */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-                <h2 className="font-semibold mb-4">🌍 By Country</h2>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+            <div className="grid grid-cols-3 gap-6">
+              <div className="border-2 border-[var(--color-charcoal)] p-4 rounded">
+                <h2 className="font-bold mb-4">🌍 By Country</h2>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
                   {Object.entries(countryStats)
                     .sort((a, b) => b[1] - a[1])
                     .map(([country, count]) => (
                       <div key={country} className="flex justify-between text-sm">
                         <span>{country}</span>
-                        <span className="text-zinc-400">{count}</span>
+                        <span className="text-[var(--color-gold)]">{count}</span>
                       </div>
                     ))}
                 </div>
               </div>
-              <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-                <h2 className="font-semibold mb-4">🏙️ By City</h2>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+              <div className="border-2 border-[var(--color-charcoal)] p-4 rounded">
+                <h2 className="font-bold mb-4">🏙️ By City</h2>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
                   {Object.entries(cityStats)
                     .sort((a, b) => b[1] - a[1])
                     .map(([city, count]) => (
                       <div key={city} className="flex justify-between text-sm">
                         <span>{city}</span>
-                        <span className="text-zinc-400">{count}</span>
+                        <span className="text-[var(--color-gold)]">{count}</span>
                       </div>
                     ))}
                 </div>
               </div>
-              <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-                <h2 className="font-semibold mb-4">📄 By Page</h2>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+              <div className="border-2 border-[var(--color-charcoal)] p-4 rounded">
+                <h2 className="font-bold mb-4">📄 By Page</h2>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
                   {Object.entries(pageStats)
                     .sort((a, b) => b[1] - a[1])
                     .map(([page, count]) => (
                       <div key={page} className="flex justify-between text-sm">
-                        <span className="font-mono">{page}</span>
-                        <span className="text-zinc-400">{count}</span>
+                        <span>{page}</span>
+                        <span className="text-[var(--color-gold)]">{count}</span>
                       </div>
                     ))}
                 </div>
               </div>
             </div>
 
-            {/* Map Links */}
-            <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800 mb-8">
-              <h2 className="font-semibold mb-4">📍 Locations (Click for Google Maps)</h2>
-              <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto text-sm font-mono">
-                {visits
-                  .filter((v) => v.location?.lat && v.location?.lon)
-                  .map((v, i) => (
-                    <a
-                      key={i}
-                      href={`https://www.google.com/maps?q=${v.location!.lat},${v.location!.lon}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-zinc-800 p-2 rounded hover:bg-zinc-700 text-blue-400"
-                    >
-                      {v.location!.city}: {v.location!.lat.toFixed(2)}, {v.location!.lon.toFixed(2)}
-                    </a>
-                  ))}
-              </div>
-            </div>
-
             {/* Recent Visits */}
-            <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
-              <h2 className="font-semibold p-4 border-b border-zinc-800">Recent Visits</h2>
+            <div className="border-2 border-[var(--color-charcoal)] rounded overflow-hidden">
+              <h2 className="font-bold p-4 border-b-2 border-[var(--color-charcoal)]">Recent Visits</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-zinc-800">
+                  <thead className="bg-[var(--color-charcoal)] text-[var(--color-cream)]">
                     <tr>
                       <th className="text-left p-3">Time</th>
                       <th className="text-left p-3">Location</th>
                       <th className="text-left p-3">Page</th>
                       <th className="text-left p-3">ISP</th>
-                      <th className="text-left p-3">Details</th>
+                      <th className="text-left p-3">Map</th>
                     </tr>
                   </thead>
                   <tbody>
                     {visits.slice(0, 50).map((visit, i) => (
-                      <tr key={i} className="border-t border-zinc-800 hover:bg-zinc-800">
-                        <td className="p-3 text-zinc-400">
+                      <tr
+                        key={i}
+                        className="border-t border-[var(--color-charcoal)]/20 hover:bg-[var(--color-charcoal)]/5 cursor-pointer"
+                        onClick={() => setSelectedVisit(visit)}
+                      >
+                        <td className="p-3 text-[var(--color-gold)]">
                           {new Date(visit.timestamp).toLocaleString()}
                         </td>
                         <td className="p-3">
@@ -292,15 +323,20 @@ export default function SecretPage() {
                             ? `${visit.location.city}, ${visit.location.region}, ${visit.location.countryCode}`
                             : "Unknown"}
                         </td>
-                        <td className="p-3 font-mono">{visit.page}</td>
-                        <td className="p-3 text-zinc-400">{visit.location?.isp || "-"}</td>
+                        <td className="p-3">{visit.page}</td>
+                        <td className="p-3 text-[var(--color-gold)]">{visit.location?.isp || "-"}</td>
                         <td className="p-3">
-                          <button
-                            onClick={() => setSelectedVisit(visit)}
-                            className="text-blue-400 hover:underline"
-                          >
-                            View
-                          </button>
+                          {visit.location && (
+                            <a
+                              href={`https://www.google.com/maps?q=${visit.location.lat},${visit.location.lon}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[var(--color-gold)] hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              View
+                            </a>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -312,15 +348,15 @@ export default function SecretPage() {
             {/* Modal */}
             {selectedVisit && (
               <div
-                className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"
+                className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
                 onClick={() => setSelectedVisit(null)}
               >
                 <div
-                  className="bg-zinc-900 p-6 rounded-lg border border-zinc-700 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+                  className="bg-[var(--color-cream)] p-6 rounded border-2 border-[var(--color-charcoal)] max-w-2xl w-full max-h-[80vh] overflow-y-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <h3 className="text-xl font-bold mb-4">Visit Details</h3>
-                  <pre className="bg-zinc-800 p-4 rounded text-sm overflow-x-auto">
+                  <pre className="bg-[var(--color-charcoal)] text-[var(--color-cream)] p-4 rounded text-sm overflow-x-auto">
                     {JSON.stringify(selectedVisit, null, 2)}
                   </pre>
                   {selectedVisit.location && (
@@ -328,14 +364,14 @@ export default function SecretPage() {
                       href={`https://www.google.com/maps?q=${selectedVisit.location.lat},${selectedVisit.location.lon}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+                      className="inline-block mt-4 px-4 py-2 bg-[var(--color-charcoal)] text-[var(--color-cream)] rounded hover:bg-[var(--color-gold)]"
                     >
                       Open in Google Maps →
                     </a>
                   )}
                   <button
                     onClick={() => setSelectedVisit(null)}
-                    className="block mt-4 text-zinc-400 hover:text-white"
+                    className="block mt-4 text-[var(--color-gold)] hover:underline"
                   >
                     Close
                   </button>
@@ -345,7 +381,6 @@ export default function SecretPage() {
           </>
         )}
       </div>
-    </div>
+    </>
   );
 }
-

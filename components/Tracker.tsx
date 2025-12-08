@@ -8,6 +8,9 @@ function TrackerInner() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    // Don't track /secret page
+    if (pathname.startsWith("/secret")) return;
+
     // Track page visit
     const track = async () => {
       try {
