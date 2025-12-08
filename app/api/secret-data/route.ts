@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { list } from "@vercel/blob";
 
+// Never cache this route
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const CORRECT_PASSWORD = process.env.NEXT_PUBLIC_SECRET_PASSWORD || "madhavan2025";
 const SECURITY_ANSWER = process.env.NEXT_PUBLIC_SECURITY_ANSWER || "chess";
 
@@ -32,7 +36,13 @@ export async function POST(request: NextRequest) {
       .filter((v) => v !== null)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-    return NextResponse.json({ visits: validVisits });
+    return NextResponse.json({ visits: validVisits }, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      },
+    });
   } catch (error) {
     console.error("Error fetching analytics:", error);
     return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });

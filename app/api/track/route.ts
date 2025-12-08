@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { put, list } from "@vercel/blob";
+import { put } from "@vercel/blob";
+
+// Never cache tracking
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
   try {
