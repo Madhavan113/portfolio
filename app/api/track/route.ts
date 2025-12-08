@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     
     // Get page info from request body
     const body = await request.json().catch(() => ({}));
-    const { page, referrer, userAgent } = body;
+    const { page, referrer, entryReferrer, entryPage, utm, userAgent } = body;
     
     // Lookup location using ip-api.com (free, no API key needed)
     let location = null;
@@ -47,6 +47,9 @@ export async function POST(request: NextRequest) {
       ip,
       page,
       referrer,
+      entryReferrer,
+      entryPage,
+      utm,
       userAgent,
       location,
     };
