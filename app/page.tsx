@@ -12,8 +12,8 @@ export default function Home() {
       </section>
 
       {/* Quote Block */}
-      <section className="mt-16 flex justify-center">
-        <blockquote className="border-l-2 border-charcoal pl-8 max-w-md">
+      <section className="mt-16">
+        <blockquote className="border-l-2 border-charcoal pl-6 ml-4 max-w-md">
           <p className="italic">&ldquo;The map precedes the territory.&rdquo;</p>
           <footer className="mt-4 text-sm">
             — Jean Baudrillard
