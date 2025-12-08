@@ -52,7 +52,7 @@ export default function SecretPage() {
 
     const interval = setInterval(() => {
       fetchAnalytics();
-    }, 30000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [stage]);
@@ -151,10 +151,10 @@ export default function SecretPage() {
   // Password stage
   if (stage === "password") {
     return (
-      <div className="space-y-6">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
         <h1 className="text-2xl font-bold">📸 Personal Photos</h1>
-        <p className="text-[var(--color-gold)]">Enter password to view private album</p>
-        <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-sm">
+        <p className="text-[var(--color-gold)] mt-2 mb-6">Enter password to view private album</p>
+        <form onSubmit={handlePasswordSubmit} className="space-y-4 w-full max-w-sm">
           <input
             type="password"
             value={password}
@@ -178,11 +178,11 @@ export default function SecretPage() {
   // Security question stage
   if (stage === "security") {
     return (
-      <div className="space-y-6">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
         <h1 className="text-2xl font-bold">🔐 Security Check</h1>
-        <p className="text-[var(--color-gold)]">Answer your security question</p>
-        <form onSubmit={handleSecuritySubmit} className="space-y-4 max-w-sm">
-          <label className="block text-sm">
+        <p className="text-[var(--color-gold)] mt-2 mb-6">Answer your security question</p>
+        <form onSubmit={handleSecuritySubmit} className="space-y-4 w-full max-w-sm">
+          <label className="block text-sm text-left">
             What game did you play competitively as a kid?
           </label>
           <input
@@ -223,7 +223,7 @@ export default function SecretPage() {
             <h1 className="text-2xl font-bold">Analytics</h1>
             {lastUpdate && (
               <p className="text-sm text-[var(--color-gold)]">
-                Updated {lastUpdate.toLocaleTimeString()} · Auto-refreshes every 30s
+                Updated {lastUpdate.toLocaleTimeString()} · Auto-refreshes every 5s
               </p>
             )}
           </div>
