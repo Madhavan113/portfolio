@@ -26,9 +26,6 @@ interface Visit {
   } | null;
 }
 
-const CORRECT_PASSWORD = process.env.NEXT_PUBLIC_SECRET_PASSWORD || "madhavan2025";
-const SECURITY_ANSWER = process.env.NEXT_PUBLIC_SECURITY_ANSWER || "chess";
-
 export default function SecretPage() {
   const [stage, setStage] = useState<"password" | "security" | "dashboard">("password");
   const [password, setPassword] = useState("");
@@ -39,6 +36,7 @@ export default function SecretPage() {
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [authToken, setAuthToken] = useState("");
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
 
@@ -46,16 +44,16 @@ export default function SecretPage() {
     document.title = "Personal Photos";
   }, []);
 
-  // Live update every 30 seconds when on dashboard
+  // Live update every 5 seconds when on dashboard
   useEffect(() => {
-    if (stage !== "dashboard") return;
+    if (stage !== "dashboard" || !authToken) return;
 
     const interval = setInterval(() => {
       fetchAnalytics();
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [stage]);
+  }, [stage, authToken]);
 
   // Initialize map when leaflet is loaded and we have visits
   useEffect(() => {
@@ -89,35 +87,65 @@ export default function SecretPage() {
     }
   }, [leafletLoaded, visits]);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === CORRECT_PASSWORD) {
-      setStage("security");
-      setError("");
-    } else {
-      setError("Incorrect password");
+    setError("");
+    
+    try {
+      const res = await fetch("/api/secret-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step: "password", password }),
+      });
+      
+      if (res.ok) {
+        setStage("security");
+        setError("");
+      } else {
+        setError("Incorrect password");
+      }
+    } catch {
+      setError("Error verifying password");
     }
   };
 
   const handleSecuritySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (securityAnswer.toLowerCase().trim() === SECURITY_ANSWER.toLowerCase()) {
-      setStage("dashboard");
-      setError("");
-      await fetchAnalytics();
-    } else {
-      setError("Incorrect answer");
-    }
-  };
-
-  const fetchAnalytics = async () => {
-    if (visits.length === 0) setLoading(true);
+    setError("");
+    
     try {
       const res = await fetch("/api/secret-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ p: CORRECT_PASSWORD, s: SECURITY_ANSWER }),
+        body: JSON.stringify({ step: "security", password, securityAnswer }),
       });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setAuthToken(data.token);
+        setStage("dashboard");
+        setError("");
+        setVisits(data.visits || []);
+        setLastUpdate(new Date());
+      } else {
+        setError("Incorrect answer");
+      }
+    } catch {
+      setError("Error verifying answer");
+    }
+  };
+
+  const fetchAnalytics = async () => {
+    if (!authToken) return;
+    if (visits.length === 0) setLoading(true);
+    
+    try {
+      const res = await fetch("/api/secret-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step: "fetch", token: authToken }),
+      });
+      
       if (res.ok) {
         const data = await res.json();
         setVisits(data.visits || []);
@@ -232,6 +260,7 @@ export default function SecretPage() {
               setStage("password");
               setPassword("");
               setSecurityAnswer("");
+              setAuthToken("");
               mapInstanceRef.current = null;
             }}
             className="text-[var(--color-gold)] hover:text-[var(--color-charcoal)]"
