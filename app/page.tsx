@@ -14,16 +14,9 @@ export default function Home() {
       {/* Quote Block */}
       <section className="mt-16">
         <blockquote className="border-l-2 border-charcoal pl-6 ml-4 max-w-md">
-          <p className="italic">&ldquo;The map precedes the territory.&rdquo;</p>
-          <footer className="mt-4 text-sm">
-            — Jean Baudrillard
-          </footer>
+          <p className="italic">&ldquo;Disagreement is the highest form of respect.&rdquo;</p>
         </blockquote>
       </section>
-
-      <p>
-        I should point out: I don&apos;t think Baudrillard is smart, actually, I think every moral philosopher is wrong.
-      </p>
     </div>
     
   );
