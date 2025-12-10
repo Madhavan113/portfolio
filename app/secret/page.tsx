@@ -3,6 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import Script from "next/script";
 
+// Escape HTML to prevent XSS
+function escapeHtml(str: string): string {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 interface Visit {
   timestamp: string;
   ip: string;
@@ -77,7 +84,7 @@ export default function SecretPage() {
             fillOpacity: 0.8,
           })
             .bindPopup(
-              `<b>${v.location.city}, ${v.location.country}</b><br>${v.page}<br><small>${new Date(v.timestamp).toLocaleString()}</small>`
+              `<b>${escapeHtml(v.location.city)}, ${escapeHtml(v.location.country)}</b><br>${escapeHtml(v.page)}<br><small>${escapeHtml(new Date(v.timestamp).toLocaleString())}</small>`
             )
             .addTo(map);
         }
