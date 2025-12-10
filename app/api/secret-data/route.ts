@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { list } from "@vercel/blob";
+import { supabase } from "@/lib/supabase";
 import crypto from "crypto";
 
 // Never cache this route
@@ -31,22 +31,44 @@ function verifyToken(token: string): boolean {
 }
 
 async function getVisits() {
-  const { blobs } = await list({ prefix: "visits/", limit: 1000 });
+  const { data, error } = await supabase
+    .from("visits")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(1000);
 
-  const visits = await Promise.all(
-    blobs.map(async (blob) => {
-      try {
-        const res = await fetch(blob.url);
-        return await res.json();
-      } catch {
-        return null;
-      }
-    })
-  );
+  if (error) {
+    console.error("Supabase fetch error:", error);
+    return [];
+  }
 
-  return visits
-    .filter((v) => v !== null)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  // Transform to match the expected format
+  return data.map((row) => ({
+    timestamp: row.created_at,
+    ip: row.ip,
+    page: row.page,
+    referrer: row.referrer,
+    entryReferrer: row.entry_referrer,
+    entryPage: row.entry_page,
+    utm: row.utm_source ? {
+      source: row.utm_source,
+      medium: row.utm_medium,
+      campaign: row.utm_campaign,
+    } : null,
+    userAgent: row.user_agent,
+    location: row.country ? {
+      country: row.country,
+      countryCode: row.country_code,
+      region: row.region,
+      city: row.city,
+      zip: row.zip,
+      lat: row.lat,
+      lon: row.lon,
+      timezone: row.timezone,
+      isp: row.isp,
+      org: row.org,
+    } : null,
+  }));
 }
 
 export async function POST(request: NextRequest) {

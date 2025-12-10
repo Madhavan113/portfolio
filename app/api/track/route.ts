@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { put, list } from "@vercel/blob";
+import { supabase } from "@/lib/supabase";
 
 // Never cache tracking
 export const dynamic = "force-dynamic";
@@ -46,21 +46,33 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    const visit = {
-      timestamp: new Date().toISOString(),
+    // Insert into Supabase
+    const { error } = await supabase.from("visits").insert({
       ip,
       page,
       referrer,
-      entryReferrer,
-      entryPage,
-      utm,
-      userAgent,
-      location,
-    };
+      entry_referrer: entryReferrer,
+      entry_page: entryPage,
+      utm_source: utm?.source || null,
+      utm_medium: utm?.medium || null,
+      utm_campaign: utm?.campaign || null,
+      user_agent: userAgent,
+      country: location?.country || null,
+      country_code: location?.countryCode || null,
+      region: location?.region || null,
+      city: location?.city || null,
+      zip: location?.zip || null,
+      lat: location?.lat || null,
+      lon: location?.lon || null,
+      timezone: location?.timezone || null,
+      isp: location?.isp || null,
+      org: location?.org || null,
+    });
     
-    // Store in Vercel Blob
-    const filename = `visits/${Date.now()}_${Math.random().toString(36).slice(2, 9)}.json`;
-    await put(filename, JSON.stringify(visit, null, 2), { access: "public" });
+    if (error) {
+      console.error("Supabase insert error:", error);
+      return NextResponse.json({ error: "Tracking failed" }, { status: 500 });
+    }
     
     console.log("📍 Visit tracked:", location?.city || ip);
     
@@ -69,37 +81,4 @@ export async function POST(request: NextRequest) {
     console.error("Tracking error:", error);
     return NextResponse.json({ error: "Tracking failed" }, { status: 500 });
   }
-}
-
-// GET endpoint to view analytics
-export async function GET(request: NextRequest) {
-  // Simple auth check
-  const authHeader = request.headers.get("authorization");
-  const expectedToken = process.env.ANALYTICS_SECRET || "dev-secret";
-  
-  if (authHeader !== `Bearer ${expectedToken}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  
-  const url = new URL(request.url);
-  const limit = parseInt(url.searchParams.get("limit") || "50");
-  
-  // List recent visit blobs
-  const { blobs } = await list({ prefix: "visits/", limit });
-  
-  // Fetch each visit's data
-  const visits = await Promise.all(
-    blobs.map(async (blob) => {
-      const res = await fetch(blob.url);
-      return res.json();
-    })
-  );
-  
-  // Sort by timestamp descending
-  visits.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  
-  return NextResponse.json({
-    total: blobs.length,
-    visits,
-  });
 }
