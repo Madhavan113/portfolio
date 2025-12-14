@@ -34,7 +34,7 @@ export default function PersonalPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simple client-side check - not meant to be secure, just a fun gate
-    if (answer.toLowerCase().trim() === "golden retriever" || answer.toLowerCase().trim() === "goldenretriever" || answer.toLowerCase().trim() === "golden") {
+    if (answer.toLowerCase().trim() === "shiba" || answer.toLowerCase().trim() === "shiba inu" || answer.toLowerCase().trim() === "shibainu") {
       setUnlocked(true);
       sessionStorage.setItem("personal_unlocked", "true");
       fetchPosts();
