@@ -11,6 +11,9 @@ export default function Header() {
           <Link href="/blog" className="hover:text-gold transition-colors">
             Blog
           </Link>
+          <Link href="/personal" className="hover:text-gold transition-colors">
+            Personal
+          </Link>
           <Link href="/portfolio" className="hover:text-gold transition-colors">
             Portfolio
           </Link>
