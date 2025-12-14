@@ -31,16 +31,27 @@ export default function PersonalPage() {
     setPosts(data.posts || []);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple client-side check - not meant to be secure, just a fun gate
-    if (answer.toLowerCase().trim() === "shiba" || answer.toLowerCase().trim() === "shiba inu" || answer.toLowerCase().trim() === "shibainu") {
-      setUnlocked(true);
-      sessionStorage.setItem("personal_unlocked", "true");
-      fetchPosts();
-      setError("");
-    } else {
-      setError("That's not it! Feel free to message me if you'd like access.");
+    setError("");
+    
+    try {
+      const res = await fetch("/api/personal-posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answer }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setUnlocked(true);
+        sessionStorage.setItem("personal_unlocked", "true");
+        setPosts(data.posts || []);
+      } else {
+        setError("That's not it! Feel free to message me if you'd like access.");
+      }
+    } catch {
+      setError("Something went wrong. Try again.");
     }
   };
 
