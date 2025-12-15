@@ -80,3 +80,4 @@ export function getAllPersonalPostSlugs(): string[] {
     .map((fileName) => fileName.replace(/\.mdx?$/, ""));
 }
 
+
