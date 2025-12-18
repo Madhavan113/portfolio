@@ -1,4 +1,36 @@
+# Allow search engines to index public content
 User-agent: *
-Disallow: /secret
-Disallow: /api/secret-data
+Allow: /
+Allow: /blog
+Allow: /portfolio
 
+# Block private/sensitive areas
+Disallow: /secret
+Disallow: /personal
+Disallow: /api/
+Disallow: /dashboard
+
+# Block AI crawlers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
