@@ -34,14 +34,14 @@ export default function PersonalPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     try {
       const res = await fetch("/api/personal-posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answer }),
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setUnlocked(true);
@@ -59,12 +59,12 @@ export default function PersonalPage() {
     return (
       <div className="space-y-8">
         <h1 className="text-2xl font-bold">Personal</h1>
-        
-        <div className="border-2 border-[var(--color-charcoal)] p-6 rounded max-w-md">
+
+        <div className="glass p-6 rounded max-w-md">
           <p className="mb-4 text-[var(--color-gold)]">
             This section contains personal writings and ramblings.
           </p>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block text-sm">
               What is my favorite dog breed?
@@ -85,7 +85,7 @@ export default function PersonalPage() {
               Enter
             </button>
           </form>
-          
+
           <p className="mt-6 text-sm text-[var(--color-charcoal)]/60">
             If you&apos;re interested in reading, feel free to message me and I&apos;ll let you in.
           </p>
