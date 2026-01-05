@@ -355,6 +355,8 @@ export default function IntroVideo() {
                     blend={50}
                     brightness={1.0}
                     audioEffect={50}
+                    // @ts-ignore
+                    muted={true}
                     enableMouse={true}
                     enableRipple={true}
                     charset="arrows"
