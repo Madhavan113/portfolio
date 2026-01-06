@@ -381,7 +381,7 @@ export default function IntroVideo() {
                     muted={true}
                     enableMouse={true}
                     enableRipple={true}
-                    charset="arrows"
+                    charset="detailed"
                     isPlaying={phase === "video"}
                     autoPlay={phase === "video"}
                 />
