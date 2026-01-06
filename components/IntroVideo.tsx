@@ -374,7 +374,7 @@ export default function IntroVideo() {
                     src="/video.mp4"
                     numColumns={200}
                     colored={true}
-                    blend={50}
+                    blend={100}
                     brightness={1.0}
                     audioEffect={50}
                     // @ts-ignore
