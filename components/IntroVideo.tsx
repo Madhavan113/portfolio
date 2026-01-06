@@ -64,6 +64,7 @@ export default function IntroVideo() {
     const [showSubtitle, setShowSubtitle] = useState(true);
     const videoStartTimeRef = useRef<number | null>(null);
     const subtitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const muteIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Force mute the video element to allow autoplay
     useEffect(() => {
@@ -81,14 +82,27 @@ export default function IntroVideo() {
         attemptMute();
 
         // Backup: Check periodically for a short time to catch lazy rendering
-        const interval = setInterval(attemptMute, 100);
-        setTimeout(() => clearInterval(interval), 2000);
+        muteIntervalRef.current = setInterval(attemptMute, 100);
+        setTimeout(() => {
+            if (muteIntervalRef.current) {
+                clearInterval(muteIntervalRef.current);
+                muteIntervalRef.current = null;
+            }
+        }, 2000);
 
-        return () => clearInterval(interval);
+        return () => {
+            if (muteIntervalRef.current) clearInterval(muteIntervalRef.current);
+        };
     }, []);
 
     // Helper to unmute
     const unmuteVideo = useCallback(() => {
+        // Stop forcing mute if user interacts!
+        if (muteIntervalRef.current) {
+            clearInterval(muteIntervalRef.current);
+            muteIntervalRef.current = null;
+        }
+
         const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
         if (video) {
             video.muted = false;
