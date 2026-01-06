@@ -65,22 +65,6 @@ export default function IntroVideo() {
     const videoStartTimeRef = useRef<number | null>(null);
     const subtitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Mobile detection for column count
-    const [numColumns, setNumColumns] = useState(200);
-
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth < 768) {
-                setNumColumns(80); // Lower resolution for mobile to fix rendering bugs
-            } else {
-                setNumColumns(200);
-            }
-        };
-        handleResize(); // Init
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
     // Force mute the video element to allow autoplay
     useEffect(() => {
         const attemptMute = () => {
@@ -389,13 +373,12 @@ export default function IntroVideo() {
                     position: "absolute",
                     inset: 0,
                     width: "100vw",
-                    height: "100dvh",
+                    height: "100vh",
                     margin: 0,
                     padding: 0,
                     lineHeight: 0,
                     fontSize: 0,
                     overflow: "hidden",
-                    touchAction: "none",
                     opacity: phase === "video" ? 1 : 0,
                     visibility: phase === "video" ? "visible" : "hidden",
                     transition: "opacity 0.8s ease-out",
@@ -404,7 +387,7 @@ export default function IntroVideo() {
             >
                 <Video2Ascii
                     src="/video.mp4"
-                    numColumns={numColumns}
+                    numColumns={200}
                     colored={true}
                     blend={50}
                     brightness={1.0}
