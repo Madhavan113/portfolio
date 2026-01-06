@@ -65,6 +65,28 @@ export default function IntroVideo() {
     const videoStartTimeRef = useRef<number | null>(null);
     const subtitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Force mute the video element to allow autoplay
+    useEffect(() => {
+        const attemptMute = () => {
+            const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
+            if (video) {
+                video.muted = true;
+                video.playsInline = true;
+                video.setAttribute("muted", "");
+                video.setAttribute("playsinline", "");
+            }
+        };
+
+        // Try immediately and strictly
+        attemptMute();
+
+        // Also check periodically in case of render delays
+        const interval = setInterval(attemptMute, 100);
+        setTimeout(() => clearInterval(interval), 2000);
+
+        return () => clearInterval(interval);
+    }, []);
+
     // Transition from hello to video after 2 seconds
     useEffect(() => {
         if (phase === "hello") {
