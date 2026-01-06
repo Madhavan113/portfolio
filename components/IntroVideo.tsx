@@ -79,6 +79,12 @@ export default function IntroVideo() {
 
         // Try immediately and strictly
         attemptMute();
+
+        // Backup: Check periodically for a short time to catch lazy rendering
+        const interval = setInterval(attemptMute, 100);
+        setTimeout(() => clearInterval(interval), 2000);
+
+        return () => clearInterval(interval);
     }, []);
 
     // Helper to unmute
