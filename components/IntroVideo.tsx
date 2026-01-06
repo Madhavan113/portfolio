@@ -65,6 +65,22 @@ export default function IntroVideo() {
     const videoStartTimeRef = useRef<number | null>(null);
     const subtitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Mobile detection for column count
+    const [numColumns, setNumColumns] = useState(200);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setNumColumns(80); // Lower resolution for mobile to fix rendering bugs
+            } else {
+                setNumColumns(200);
+            }
+        };
+        handleResize(); // Init
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     // Force mute the video element to allow autoplay
     useEffect(() => {
         const attemptMute = () => {
@@ -79,12 +95,19 @@ export default function IntroVideo() {
 
         // Try immediately and strictly
         attemptMute();
+    }, []);
 
-        // Also check periodically in case of render delays
-        const interval = setInterval(attemptMute, 100);
-        setTimeout(() => clearInterval(interval), 2000);
-
-        return () => clearInterval(interval);
+    // Helper to unmute
+    const unmuteVideo = useCallback(() => {
+        const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
+        if (video) {
+            video.muted = false;
+            video.removeAttribute("muted");
+            // Try to play if paused (sometimes needed after unmuting)
+            if (video.paused) {
+                video.play().catch(() => { });
+            }
+        }
     }, []);
 
     // Transition from hello to video after 2 seconds
@@ -229,16 +252,24 @@ export default function IntroVideo() {
     // Handle click for different phases
     const handleClick = useCallback(() => {
         if (phase === "hello") {
+            unmuteVideo(); // User interacted, so we can unmute!
             setPhase("video");
         } else if (phase === "video") {
-            setFadeOut(true);
-            setTimeout(() => {
-                setPhase("skipped");
-            }, 500);
+            const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
+            // If still muted (e.g. from auto-transition), first click unmutes
+            if (video && video.muted) {
+                unmuteVideo();
+            } else {
+                // Otherwise skip
+                setFadeOut(true);
+                setTimeout(() => {
+                    setPhase("skipped");
+                }, 500);
+            }
         } else if (phase === "thanks" || phase === "skipped") {
             setPhase("done");
         }
-    }, [phase]);
+    }, [phase, unmuteVideo]);
 
     // Transition from thanks/skipped to done after showing message
     useEffect(() => {
@@ -358,12 +389,13 @@ export default function IntroVideo() {
                     position: "absolute",
                     inset: 0,
                     width: "100vw",
-                    height: "100vh",
+                    height: "100dvh",
                     margin: 0,
                     padding: 0,
                     lineHeight: 0,
                     fontSize: 0,
                     overflow: "hidden",
+                    touchAction: "none",
                     opacity: phase === "video" ? 1 : 0,
                     visibility: phase === "video" ? "visible" : "hidden",
                     transition: "opacity 0.8s ease-out",
@@ -372,9 +404,9 @@ export default function IntroVideo() {
             >
                 <Video2Ascii
                     src="/video.mp4"
-                    numColumns={200}
+                    numColumns={numColumns}
                     colored={true}
-                    blend={100}
+                    blend={50}
                     brightness={1.0}
                     audioEffect={50}
                     // @ts-ignore
