@@ -7,51 +7,14 @@ type IntroPhase = "hello" | "video" | "thanks" | "skipped" | "done";
 
 // Time-based subtitles: [startTime in seconds, text, duration (optional, for disappearing)]
 const TIMED_SUBTITLES: [number, string, number?][] = [
-    // intro FIRST
     [2, "hi, my name is madhavan."],
-    [6, "thanks to clams casino for the intro."],
-    [10, "i made this site to document what i'm learning,"],
-    [14, "and the things i never could've figured out alone."],
-    [18, "so thanks to everyone who's helped along the way."],
-    [22, "and thanks to elijah from yutori for the ascii library."],
-
-    // commentary starts
-    [30, "we open with a woman resting. maybe she is not alone."],
-    [35, "it feels peaceful, but something about it feels tense."],
-    [40, "then the tone shifts completely."],
-    [45, "someone is burned at the stake. we never really know why."],
-    [50, "from here the video starts to feel like a dream."],
-
-    [60, "i like videos that leave things unanswered. they keep suspense alive."],
-
-    // book moment
-    [69, "she finds a book. it seems important, but we have no idea how yet."],
-    [75, "suddenly there are two versions of her. then more fire again."],
-
-    // easter egg
-    [90, "(shiba)", 5],
-
-    // relationship thread
-    [120, "later, we see a man totally fixated on her."],
-    [128, "it feels less like love and more like he is chasing the idea of her."],
-    [145, "he wakes up. she is gone."],
-    [150, "maybe it happened. maybe it was all in his head."],
-
-    [160, "i like that the video never explains itself."],
-
-    // unraveling
-    [170, "by now the scenes stop lining up in a clean way."],
-    [175, "it feels like moments stitched together on purpose."],
-    [180, "it barely looks real anymore."],
-
-    // closing
-    [210, "not everything here makes sense."],
-    [214, "but it leaves something behind anyway."],
-    [218, "thanks for watching."],
+    [6, "this is my website."],
+    [10, "thanks to elijah from yutori for the ascii library."],
+    [20, "(shiba)", 5],
 ];
 
-// Video duration in seconds (when to show thanks) - video is 3:38, show at 3:40
-const VIDEO_DURATION = 220; // 3:40
+// Video duration in seconds (when to show thanks) - video3.mp4 is 2:22
+const VIDEO_DURATION = 142;
 
 export default function IntroVideo() {
     const [phase, setPhase] = useState<IntroPhase>("hello");
@@ -62,6 +25,7 @@ export default function IntroVideo() {
     const [isTyping, setIsTyping] = useState(false);
     const [videoTime, setVideoTime] = useState(0);
     const [showSubtitle, setShowSubtitle] = useState(true);
+    const [audioEnabled, setAudioEnabled] = useState(false);
     const videoStartTimeRef = useRef<number | null>(null);
     const subtitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const muteIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -253,27 +217,23 @@ export default function IntroVideo() {
         };
     }, [phase, handleWheel, handleTouchMove]);
 
+    // Handle click on audio prompt (enables audio without skipping)
+    const handleAudioPromptClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation(); // Don't trigger parent click
+        unmuteVideo();
+        setAudioEnabled(true);
+    }, [unmuteVideo]);
+
     // Handle click for different phases
     const handleClick = useCallback(() => {
         if (phase === "hello") {
-            unmuteVideo(); // User interacted, so we can unmute!
+            // Don't unmute here - let the audio prompt handle it
             setPhase("video");
-        } else if (phase === "video") {
-            const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
-            // If still muted (e.g. from auto-transition), first click unmutes
-            if (video && video.muted) {
-                unmuteVideo();
-            } else {
-                // Otherwise skip
-                setFadeOut(true);
-                setTimeout(() => {
-                    setPhase("skipped");
-                }, 500);
-            }
         } else if (phase === "thanks" || phase === "skipped") {
             setPhase("done");
         }
-    }, [phase, unmuteVideo]);
+        // Note: clicking during video phase no longer skips - use scroll to skip
+    }, [phase]);
 
     // Transition from thanks/skipped to done after showing message
     useEffect(() => {
@@ -319,7 +279,7 @@ export default function IntroVideo() {
         >
             {/* Hidden video preloader - loads video in background during hello phase */}
             <video
-                src="/video.mp4"
+                src="/video3.mp4"
                 preload="auto"
                 muted
                 playsInline
@@ -406,7 +366,7 @@ export default function IntroVideo() {
                 className="fullscreen-ascii"
             >
                 <Video2Ascii
-                    src="/video.mp4"
+                    src="/video3.mp4"
                     numColumns={200}
                     colored={true}
                     blend={50}
@@ -459,6 +419,78 @@ export default function IntroVideo() {
                     </div>
                 )}
 
+                {/* Audio Enable Prompt - shows until user clicks to enable sound */}
+                {phase === "video" && !audioEnabled && (
+                    <div
+                        onClick={handleAudioPromptClick}
+                        style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            zIndex: 10,
+                            animation: "fadeIn 0.5s ease-out",
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: "80px",
+                                height: "80px",
+                                borderRadius: "50%",
+                                border: "2px solid rgba(245, 240, 232, 0.8)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                background: "rgba(0, 0, 0, 0.4)",
+                                marginBottom: "1rem",
+                                transition: "transform 0.2s ease, background 0.2s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "scale(1.1)";
+                                e.currentTarget.style.background = "rgba(0, 0, 0, 0.6)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "scale(1)";
+                                e.currentTarget.style.background = "rgba(0, 0, 0, 0.4)";
+                            }}
+                        >
+                            {/* Sound icon */}
+                            <svg
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#F5F0E8"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                            </svg>
+                        </div>
+                        <span
+                            style={{
+                                color: "#F5F0E8",
+                                fontFamily: "'Courier Prime', monospace",
+                                fontSize: "0.85rem",
+                                letterSpacing: "0.1em",
+                                textTransform: "uppercase",
+                                opacity: 0.9,
+                                textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                            }}
+                        >
+                            click for sound
+                        </span>
+                    </div>
+                )}
+
                 {/* Skip hint */}
                 {phase === "video" && (
                     <div
@@ -477,7 +509,7 @@ export default function IntroVideo() {
                             borderRadius: "4px",
                         }}
                     >
-                        scroll or click to skip
+                        scroll to skip
                     </div>
                 )}
             </div>
