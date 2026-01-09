@@ -88,6 +88,37 @@ export default function IntroVideo() {
         }
     }, [phase]);
 
+    // Force repaint and video play when video phase starts (fixes production rendering issue)
+    useEffect(() => {
+        if (phase !== "video") return;
+
+        // Force a repaint by triggering a layout recalculation
+        const forceRepaint = () => {
+            const container = document.querySelector(".fullscreen-ascii") as HTMLElement;
+            if (container) {
+                // Force layout recalculation
+                container.style.display = 'none';
+                container.offsetHeight; // Trigger reflow
+                container.style.display = '';
+            }
+
+            const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
+            if (video) {
+                video.play().catch(() => { });
+            }
+        };
+
+        // Run immediately and after a short delay
+        forceRepaint();
+        const timer = setTimeout(forceRepaint, 100);
+        const timer2 = setTimeout(forceRepaint, 500);
+
+        return () => {
+            clearTimeout(timer);
+            clearTimeout(timer2);
+        };
+    }, [phase]);
+
     // Track video time when in video phase
     useEffect(() => {
         if (phase !== "video") {
