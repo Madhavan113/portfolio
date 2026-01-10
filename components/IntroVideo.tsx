@@ -92,30 +92,34 @@ export default function IntroVideo() {
     useEffect(() => {
         if (phase !== "video") return;
 
-        // Force a repaint by triggering a layout recalculation
+        // Force canvas to repaint by dispatching resize event
         const forceRepaint = () => {
-            const container = document.querySelector(".fullscreen-ascii") as HTMLElement;
-            if (container) {
-                // Force layout recalculation
-                container.style.display = 'none';
-                container.offsetHeight; // Trigger reflow
-                container.style.display = '';
-            }
+            // Dispatch resize event to trigger canvas recalculation
+            window.dispatchEvent(new Event('resize'));
 
             const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
             if (video) {
                 video.play().catch(() => { });
             }
+
+            // Also try triggering a requestAnimationFrame to ensure rendering
+            requestAnimationFrame(() => {
+                window.dispatchEvent(new Event('resize'));
+            });
         };
 
-        // Run immediately and after a short delay
+        // Run immediately and at increasing intervals
         forceRepaint();
-        const timer = setTimeout(forceRepaint, 100);
-        const timer2 = setTimeout(forceRepaint, 500);
+        const timer1 = setTimeout(forceRepaint, 100);
+        const timer2 = setTimeout(forceRepaint, 300);
+        const timer3 = setTimeout(forceRepaint, 500);
+        const timer4 = setTimeout(forceRepaint, 1000);
 
         return () => {
-            clearTimeout(timer);
+            clearTimeout(timer1);
             clearTimeout(timer2);
+            clearTimeout(timer3);
+            clearTimeout(timer4);
         };
     }, [phase]);
 
