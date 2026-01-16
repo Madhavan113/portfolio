@@ -25,12 +25,10 @@ export default function IntroVideo() {
     const [isTyping, setIsTyping] = useState(false);
     const [videoTime, setVideoTime] = useState(0);
     const [showSubtitle, setShowSubtitle] = useState(true);
-    const [audioEnabled, setAudioEnabled] = useState(false);
     const videoStartTimeRef = useRef<number | null>(null);
     const subtitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const muteIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Force mute the video element to allow autoplay
+    // Force mute the video element - audio is permanently disabled
     useEffect(() => {
         const attemptMute = () => {
             const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
@@ -42,41 +40,15 @@ export default function IntroVideo() {
             }
         };
 
-        // Try immediately and strictly
+        // Try immediately and periodically to ensure video stays muted
         attemptMute();
+        const interval = setInterval(attemptMute, 100);
+        setTimeout(() => clearInterval(interval), 2000);
 
-        // Backup: Check periodically for a short time to catch lazy rendering
-        muteIntervalRef.current = setInterval(attemptMute, 100);
-        setTimeout(() => {
-            if (muteIntervalRef.current) {
-                clearInterval(muteIntervalRef.current);
-                muteIntervalRef.current = null;
-            }
-        }, 2000);
-
-        return () => {
-            if (muteIntervalRef.current) clearInterval(muteIntervalRef.current);
-        };
+        return () => clearInterval(interval);
     }, []);
 
-    // Helper to unmute
-    const unmuteVideo = useCallback(() => {
-        // Stop forcing mute if user interacts!
-        if (muteIntervalRef.current) {
-            clearInterval(muteIntervalRef.current);
-            muteIntervalRef.current = null;
-        }
 
-        const video = document.querySelector(".fullscreen-ascii video") as HTMLVideoElement;
-        if (video) {
-            video.muted = false;
-            video.removeAttribute("muted");
-            // Try to play if paused (sometimes needed after unmuting)
-            if (video.paused) {
-                video.play().catch(() => { });
-            }
-        }
-    }, []);
 
     // Transition from hello to video after 2 seconds
     useEffect(() => {
@@ -252,12 +224,7 @@ export default function IntroVideo() {
         };
     }, [phase, handleWheel, handleTouchMove]);
 
-    // Handle click on audio prompt (enables audio without skipping)
-    const handleAudioPromptClick = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation(); // Don't trigger parent click
-        unmuteVideo();
-        setAudioEnabled(true);
-    }, [unmuteVideo]);
+
 
     // Handle click for different phases
     const handleClick = useCallback(() => {
@@ -454,77 +421,7 @@ export default function IntroVideo() {
                     </div>
                 )}
 
-                {/* Audio Enable Prompt - shows until user clicks to enable sound */}
-                {phase === "video" && !audioEnabled && (
-                    <div
-                        onClick={handleAudioPromptClick}
-                        style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            cursor: "pointer",
-                            zIndex: 10,
-                            animation: "fadeIn 0.5s ease-out",
-                        }}
-                    >
-                        <div
-                            style={{
-                                width: "80px",
-                                height: "80px",
-                                borderRadius: "50%",
-                                border: "2px solid rgba(245, 240, 232, 0.8)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                background: "rgba(0, 0, 0, 0.4)",
-                                marginBottom: "1rem",
-                                transition: "transform 0.2s ease, background 0.2s ease",
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = "scale(1.1)";
-                                e.currentTarget.style.background = "rgba(0, 0, 0, 0.6)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = "scale(1)";
-                                e.currentTarget.style.background = "rgba(0, 0, 0, 0.4)";
-                            }}
-                        >
-                            {/* Sound icon */}
-                            <svg
-                                width="32"
-                                height="32"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="#F5F0E8"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                            </svg>
-                        </div>
-                        <span
-                            style={{
-                                color: "#F5F0E8",
-                                fontFamily: "'Courier Prime', monospace",
-                                fontSize: "0.85rem",
-                                letterSpacing: "0.1em",
-                                textTransform: "uppercase",
-                                opacity: 0.9,
-                                textShadow: "0 2px 4px rgba(0,0,0,0.5)",
-                            }}
-                        >
-                            click for sound
-                        </span>
-                    </div>
-                )}
+
 
                 {/* Skip hint */}
                 {phase === "video" && (
