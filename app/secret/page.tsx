@@ -44,6 +44,8 @@ export default function SecretPage() {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [authToken, setAuthToken] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
 
@@ -270,6 +272,7 @@ export default function SecretPage() {
               setPassword("");
               setSecurityAnswer("");
               setAuthToken("");
+              setCurrentPage(1);
               mapInstanceRef.current = null;
             }}
             className="text-[var(--color-gold)] hover:text-[var(--color-charcoal)]"
@@ -354,7 +357,12 @@ export default function SecretPage() {
 
             {/* Recent Visits */}
             <div className="border-2 border-[var(--color-charcoal)] rounded overflow-hidden">
-              <h2 className="font-bold p-4 border-b-2 border-[var(--color-charcoal)]">Recent Visits</h2>
+              <div className="flex justify-between items-center p-4 border-b-2 border-[var(--color-charcoal)]">
+                <h2 className="font-bold">Recent Visits</h2>
+                <span className="text-sm text-[var(--color-gold)]">
+                  Showing {Math.min((currentPage - 1) * itemsPerPage + 1, visits.length)}-{Math.min(currentPage * itemsPerPage, visits.length)} of {visits.length}
+                </span>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-[var(--color-charcoal)] text-[var(--color-cream)]">
@@ -367,7 +375,9 @@ export default function SecretPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {visits.slice(0, 50).map((visit, i) => (
+                    {visits
+                      .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                      .map((visit, i) => (
                       <tr
                         key={i}
                         className="border-t border-[var(--color-charcoal)]/20 hover:bg-[var(--color-charcoal)]/5 cursor-pointer"
@@ -401,6 +411,42 @@ export default function SecretPage() {
                   </tbody>
                 </table>
               </div>
+              {/* Pagination Controls */}
+              {visits.length > itemsPerPage && (
+                <div className="flex justify-center items-center gap-2 p-4 border-t-2 border-[var(--color-charcoal)]">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 border border-[var(--color-charcoal)] rounded disabled:opacity-30 hover:bg-[var(--color-charcoal)] hover:text-[var(--color-cream)] disabled:hover:bg-transparent disabled:hover:text-inherit"
+                  >
+                    ««
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 border border-[var(--color-charcoal)] rounded disabled:opacity-30 hover:bg-[var(--color-charcoal)] hover:text-[var(--color-cream)] disabled:hover:bg-transparent disabled:hover:text-inherit"
+                  >
+                    «
+                  </button>
+                  <span className="px-4 py-1">
+                    Page {currentPage} of {Math.ceil(visits.length / itemsPerPage)}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(Math.ceil(visits.length / itemsPerPage), p + 1))}
+                    disabled={currentPage >= Math.ceil(visits.length / itemsPerPage)}
+                    className="px-3 py-1 border border-[var(--color-charcoal)] rounded disabled:opacity-30 hover:bg-[var(--color-charcoal)] hover:text-[var(--color-cream)] disabled:hover:bg-transparent disabled:hover:text-inherit"
+                  >
+                    »
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(Math.ceil(visits.length / itemsPerPage))}
+                    disabled={currentPage >= Math.ceil(visits.length / itemsPerPage)}
+                    className="px-3 py-1 border border-[var(--color-charcoal)] rounded disabled:opacity-30 hover:bg-[var(--color-charcoal)] hover:text-[var(--color-cream)] disabled:hover:bg-transparent disabled:hover:text-inherit"
+                  >
+                    »»
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Modal */}
