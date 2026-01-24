@@ -308,7 +308,7 @@ export default function IntroVideo() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        background: "#FFFFFF", // white
+                        background: "#000000", // black
                         margin: 0,
                         padding: 0,
                     }}
@@ -319,7 +319,7 @@ export default function IntroVideo() {
                                 '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif',
                             fontSize: "clamp(5rem, 20vw, 14rem)",
                             fontWeight: 500,
-                            color: "#000000", // black
+                            color: "#FFFFFF", // white
                             letterSpacing: "-0.03em",
                             margin: 0,
                             animation: "fadeIn 1s ease-out",
@@ -335,7 +335,7 @@ export default function IntroVideo() {
                             bottom: "3rem",
                             left: "50%",
                             transform: "translateX(-50%)",
-                            color: "#000000",
+                            color: "#FFFFFF",
                             opacity: 0.4,
                             fontFamily: "'Courier Prime', monospace",
                             fontSize: "0.75rem",

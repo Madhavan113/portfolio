@@ -71,7 +71,7 @@ export default function SecretPage() {
       if (!L) return;
 
       const map = L.map(mapRef.current).setView([20, 0], 2);
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
         attribution: "© OpenStreetMap contributors © CARTO",
       }).addTo(map);
 
@@ -79,8 +79,8 @@ export default function SecretPage() {
         if (v.location?.lat && v.location?.lon) {
           L.circleMarker([v.location.lat, v.location.lon], {
             radius: 6,
-            fillColor: "#666666",
-            color: "#000000",
+            fillColor: "#888888",
+            color: "#FFFFFF",
             weight: 1,
             opacity: 1,
             fillOpacity: 0.8,
@@ -309,7 +309,7 @@ export default function SecretPage() {
             <div
               ref={mapRef}
               className="h-80 rounded border-2 border-[var(--color-charcoal)]"
-              style={{ background: "#f0f0f0" }}
+              style={{ background: "#1a1a1a" }}
             />
 
             {/* Panels */}

@@ -5,9 +5,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 :root {
-  --color-cream: #FFFFFF;
-  --color-charcoal: #000000;
-  --color-gold: #666666;
+  --color-cream: #000000;
+  --color-charcoal: #FFFFFF;
+  --color-gold: #888888;
 }
 
 html,
@@ -27,68 +27,68 @@ body {
 
 /* Liquid Glass Effect Utilities */
 .glass {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
-  box-shadow:
-    0 4px 30px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass:hover {
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
-
-.glass-dark {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   box-shadow:
-    0 4px 30px rgba(0, 0, 0, 0.15),
+    0 4px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass:hover {
+  background: rgba(0, 0, 0, 0.75);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+}
+
+.glass-dark {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-dark:hover {
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(255, 255, 255, 0.15);
   box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.2),
+    0 8px 40px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
     inset 0 -1px 0 rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
 .glass-gray {
-  background: rgba(102, 102, 102, 0.15);
+  background: rgba(136, 136, 136, 0.15);
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid rgba(102, 102, 102, 0.2);
+  border: 1px solid rgba(136, 136, 136, 0.2);
   border-radius: 16px;
   box-shadow:
-    0 4px 24px rgba(102, 102, 102, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(102, 102, 102, 0.1);
+    0 4px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-gray:hover {
-  background: rgba(102, 102, 102, 0.25);
+  background: rgba(136, 136, 136, 0.25);
   box-shadow:
-    0 8px 32px rgba(102, 102, 102, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(102, 102, 102, 0.12);
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
