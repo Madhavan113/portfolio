@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        cream: "#F5F0E8",
-        charcoal: "#2D2A26",
-        gold: "#8B7355",
+        cream: "#FFFFFF",
+        charcoal: "#000000",
+        gold: "#666666",
       },
       fontFamily: {
         mono: ['"Courier Prime"', "Courier New", "monospace"],

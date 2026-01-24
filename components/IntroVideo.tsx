@@ -270,7 +270,7 @@ export default function IntroVideo() {
                 width: "100vw",
                 height: "100vh",
                 zIndex: 99999,
-                background: "#2D2A26", // charcoal
+                background: "#000000", // black
                 cursor: "pointer",
                 opacity: fadeOut ? 0 : 1,
                 transition: "opacity 0.5s ease-out",
@@ -308,7 +308,7 @@ export default function IntroVideo() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        background: "#F5F0E8", // cream
+                        background: "#FFFFFF", // white
                         margin: 0,
                         padding: 0,
                     }}
@@ -319,14 +319,13 @@ export default function IntroVideo() {
                                 '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif',
                             fontSize: "clamp(5rem, 20vw, 14rem)",
                             fontWeight: 500,
-                            color: "#2D2A26", // charcoal
+                            color: "#000000", // black
                             letterSpacing: "-0.03em",
                             margin: 0,
-                            textTransform: "lowercase",
                             animation: "fadeIn 1s ease-out",
                         }}
                     >
-                        hello
+                        Salvē!
                     </h1>
 
                     {/* Click to continue hint */}
@@ -336,7 +335,7 @@ export default function IntroVideo() {
                             bottom: "3rem",
                             left: "50%",
                             transform: "translateX(-50%)",
-                            color: "#2D2A26",
+                            color: "#000000",
                             opacity: 0.4,
                             fontFamily: "'Courier Prime', monospace",
                             fontSize: "0.75rem",
@@ -391,7 +390,7 @@ export default function IntroVideo() {
                             bottom: "6rem",
                             left: "50%",
                             transform: "translateX(-50%)",
-                            color: "#F5F0E8",
+                            color: "#FFFFFF",
                             fontFamily: "'Courier Prime', monospace",
                             fontSize: "clamp(1rem, 3vw, 1.5rem)",
                             letterSpacing: "0.05em",
@@ -411,7 +410,7 @@ export default function IntroVideo() {
                                     display: "inline-block",
                                     width: "2px",
                                     height: "1.2em",
-                                    background: "#F5F0E8",
+                                    background: "#FFFFFF",
                                     marginLeft: "4px",
                                     verticalAlign: "text-bottom",
                                     animation: "blink 1s infinite",
@@ -430,7 +429,7 @@ export default function IntroVideo() {
                             position: "absolute",
                             bottom: "2rem",
                             right: "2rem",
-                            color: "#F5F0E8",
+                            color: "#FFFFFF",
                             opacity: 0.6,
                             fontFamily: "'Courier Prime', monospace",
                             fontSize: "0.7rem",

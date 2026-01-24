@@ -79,8 +79,8 @@ export default function SecretPage() {
         if (v.location?.lat && v.location?.lon) {
           L.circleMarker([v.location.lat, v.location.lon], {
             radius: 6,
-            fillColor: "#8B7355",
-            color: "#2D2A26",
+            fillColor: "#666666",
+            color: "#000000",
             weight: 1,
             opacity: 1,
             fillOpacity: 0.8,
@@ -309,7 +309,7 @@ export default function SecretPage() {
             <div
               ref={mapRef}
               className="h-80 rounded border-2 border-[var(--color-charcoal)]"
-              style={{ background: "#e8e4dc" }}
+              style={{ background: "#f0f0f0" }}
             />
 
             {/* Panels */}
