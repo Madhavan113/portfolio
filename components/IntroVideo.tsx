@@ -7,9 +7,25 @@ type IntroPhase = "hello" | "video" | "thanks" | "skipped" | "done";
 
 const TIMED_SUBTITLES: [number, string, number?][] = [
   [2, "hi, my name is madhavan."],
-  [6, "this is my website."],
-  [10, "a point cloud rebuilding each frame."],
-  [20, "(shiba)", 5],
+  [6, "thanks for visiting."],
+  [
+    10,
+    "i have separated most of the content of this website into random things i have worked on or thought about.",
+  ],
+  [
+    21,
+    "i apologize for the bad writing, as i'm not a good writer and i don't like to use ai for my writing.",
+  ],
+  [
+    33,
+    "i'm looking to improve at design, and so i'm also apologizing if you find some designs to be gaudy.",
+  ],
+  [44, "beyond that i don't believe i have much else to say!"],
+  [49, "also thanks for reading. the code is (shiba)."],
+  [
+    55,
+    "please don't rage at me if you disagree, but feel free to email me and i will read your email.",
+  ],
 ];
 
 const VIDEO_DURATION = 142;
@@ -34,7 +50,7 @@ function easeOutCubic(value: number) {
 }
 
 export default function IntroVideo() {
-  const [phase, setPhase] = useState<IntroPhase>("hello");
+  const [phase, setPhase] = useState<IntroPhase>("video");
   const [fadeOut, setFadeOut] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(-1);
@@ -46,6 +62,29 @@ export default function IntroVideo() {
   const subtitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const didCommitBackgroundRef = useRef(false);
+
+  const finalizeToBackground = useCallback(() => {
+    if (didCommitBackgroundRef.current) return;
+    didCommitBackgroundRef.current = true;
+
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+    }
+
+    try {
+      sessionStorage.removeItem("site-point-background");
+      localStorage.removeItem("site-point-background");
+    } catch {
+      // Ignore storage access failures.
+    }
+
+    setFadeOut(true);
+    setTimeout(() => {
+      setPhase("done");
+    }, 500);
+  }, []);
 
   useEffect(() => {
     const ensureMuted = () => {
@@ -68,16 +107,6 @@ export default function IntroVideo() {
       clearTimeout(timeout);
     };
   }, []);
-
-  useEffect(() => {
-    if (phase !== "hello") return;
-
-    const timer = setTimeout(() => {
-      setPhase("video");
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [phase]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -106,7 +135,7 @@ export default function IntroVideo() {
     };
 
     const handleCanPlay = () => startPlayback();
-    const handleEnded = () => setPhase("thanks");
+    const handleEnded = () => finalizeToBackground();
 
     startPlayback();
     video.addEventListener("canplay", handleCanPlay);
@@ -127,7 +156,7 @@ export default function IntroVideo() {
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("ended", handleEnded);
     };
-  }, [phase]);
+  }, [phase, finalizeToBackground]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -161,12 +190,12 @@ export default function IntroVideo() {
       setVideoTime(elapsed);
 
       if (video.ended || elapsed >= (video.duration || VIDEO_DURATION)) {
-        setPhase("thanks");
+        finalizeToBackground();
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [phase]);
+  }, [phase, finalizeToBackground]);
 
   useEffect(() => {
     if (phase !== "video") return;
@@ -855,26 +884,20 @@ export default function IntroVideo() {
     (event: WheelEvent) => {
       if (phase === "video" || phase === "hello") {
         event.preventDefault();
-        setFadeOut(true);
-        setTimeout(() => {
-          setPhase("skipped");
-        }, 500);
+        finalizeToBackground();
       }
     },
-    [phase]
+    [phase, finalizeToBackground]
   );
 
   const handleTouchMove = useCallback(
     (event: TouchEvent) => {
       if (phase === "video" || phase === "hello") {
         event.preventDefault();
-        setFadeOut(true);
-        setTimeout(() => {
-          setPhase("skipped");
-        }, 500);
+        finalizeToBackground();
       }
     },
-    [phase]
+    [phase, finalizeToBackground]
   );
 
   useEffect(() => {
@@ -906,14 +929,6 @@ export default function IntroVideo() {
   }, [phase]);
 
   useEffect(() => {
-    if (phase === "thanks") {
-      const timer = setTimeout(() => {
-        setPhase("done");
-      }, 4000);
-
-      return () => clearTimeout(timer);
-    }
-
     if (phase === "skipped") {
       const timer = setTimeout(() => {
         setPhase("done");
@@ -1094,49 +1109,6 @@ export default function IntroVideo() {
           </div>
         )}
       </div>
-
-      {phase === "thanks" && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#000000",
-            animation: "fadeIn 0.8s ease-out",
-          }}
-        >
-          <h1
-            style={{
-              fontFamily: "'Courier Prime', monospace",
-              fontSize: "clamp(1.5rem, 5vw, 3rem)",
-              fontWeight: 400,
-              color: "#FFFFFF",
-              letterSpacing: "0.05em",
-              margin: 0,
-              textAlign: "center",
-              padding: "0 2rem",
-            }}
-          >
-            thanks for your time.
-          </h1>
-          <p
-            style={{
-              fontFamily: "'Courier Prime', monospace",
-              fontSize: "0.8rem",
-              color: "rgba(255, 255, 255, 0.5)",
-              marginTop: "2rem",
-              letterSpacing: "0.1em",
-            }}
-          >
-            click to continue
-          </p>
-        </div>
-      )}
 
       {phase === "skipped" && (
         <div

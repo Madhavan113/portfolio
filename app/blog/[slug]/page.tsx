@@ -38,8 +38,8 @@ export default async function BlogPost({ params }: Props) {
   }
 
   return (
-    <article>
-      <header className="mb-8">
+    <article className="space-y-8">
+      <header className="mb-8 rounded-2xl border border-charcoal/10 bg-white/55 px-6 py-5">
         <Link
           href="/blog"
           className="text-sm text-charcoal/60 hover:text-gold transition-colors"
@@ -47,10 +47,10 @@ export default async function BlogPost({ params }: Props) {
           ← Back to blog
         </Link>
         <h1 className="text-2xl font-bold mt-4">{post.title}</h1>
-        <time className="text-sm text-charcoal/60 mt-2 block">{post.date}</time>
+        <time className="text-sm text-charcoal/58 mt-2 block">{post.date}</time>
       </header>
 
-      <div className="prose">
+      <div className="prose max-w-none text-charcoal">
         <MDXRemote source={post.content} />
       </div>
     </article>

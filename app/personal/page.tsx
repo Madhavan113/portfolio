@@ -86,7 +86,7 @@ export default function PersonalPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-[var(--color-charcoal)]/60">
+          <p className="mt-6 text-sm text-[var(--color-charcoal)]/68">
             If you&apos;re interested in reading, feel free to message me and I&apos;ll let you in.
           </p>
         </div>
@@ -96,25 +96,30 @@ export default function PersonalPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Personal</h1>
-      <p className="text-[var(--color-gold)]">Ramblings and personal writings.</p>
+      <header className="space-y-3">
+        <h1 className="text-2xl font-bold">Personal</h1>
+        <p className="text-[var(--color-gold)]">Ramblings and personal writings.</p>
+      </header>
 
-      <ul className="space-y-6">
+      <ul className="space-y-4">
         {posts.map((post) => (
           <li key={post.slug}>
-            <Link href={`/personal/${post.slug}`} className="block group">
+            <Link
+              href={`/personal/${post.slug}`}
+              className="group block rounded-2xl border border-charcoal/10 bg-white/55 px-5 py-4 transition-colors hover:border-charcoal/20 hover:bg-white/72"
+            >
               <h2 className="text-lg font-medium group-hover:text-gold transition-colors">
                 {post.title}
               </h2>
-              <p className="text-sm text-charcoal/60 mt-1">{post.description}</p>
-              <time className="text-sm text-charcoal/40">{post.date}</time>
+              <p className="mt-2 text-sm text-charcoal/68">{post.description}</p>
+              <time className="text-sm text-charcoal/50">{post.date}</time>
             </Link>
           </li>
         ))}
       </ul>
 
       {posts.length === 0 && (
-        <p className="text-charcoal/60">No posts yet.</p>
+        <p className="text-charcoal/65">No posts yet.</p>
       )}
     </div>
   );
