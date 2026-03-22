@@ -67,5 +67,5 @@ Your site will be live at `your-project.vercel.app`.
 - **Background**: Warm cream (#F5F0E8)
 - **Text**: Dark charcoal (#2D2A26)
 - **Accent**: Muted gold (#8B7355)
-- **Font**: Courier Prime (typewriter style)
+- **Font**: Geist Mono
 
