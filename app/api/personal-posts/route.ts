@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllPersonalPosts } from "@/lib/personal";
 
+// Never cache or prerender this route.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // The answer is server-side only, never sent to client
 const PERSONAL_ANSWER = process.env.PERSONAL_ANSWER || "shiba";
 
