@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import crypto from "crypto";
 
 // Never cache this route
@@ -31,6 +31,7 @@ function verifyToken(token: string): boolean {
 }
 
 async function getVisits() {
+  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("visits")
     .select("*")

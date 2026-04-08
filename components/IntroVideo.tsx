@@ -1,38 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-type IntroPhase = "hello" | "video" | "thanks" | "skipped" | "done";
-
-const TIMED_SUBTITLES: [number, string, number?][] = [
-  [2, "hi, my name is madhavan."],
-  [6, "thanks for visiting."],
-  [
-    10,
-    "i have separated most of the content of this website into random things i have worked on or thought about.",
-  ],
-  [
-    21,
-    "i apologize for the bad writing, as i'm not a good writer and i don't like to use ai for my writing.",
-  ],
-  [
-    33,
-    "i'm looking to improve at design, and so i'm also apologizing if you find some designs to be gaudy.",
-  ],
-  [44, "beyond that i don't believe i have much else to say!"],
-  [49, "also thanks for reading. the code is (shiba)."],
-  [
-    55,
-    "please don't rage at me if you disagree, but feel free to email me and i will read your email.",
-  ],
-];
-
-const VIDEO_DURATION = 142;
 const SCENE_W = 1920;
 const SCENE_H = 1080;
 const SAMPLE_FPS = 24;
-const PAPER_COLOR = "#ebe3d3";
+const PAPER_COLOR = "#ffffff";
 const SUBCELL_OFFSETS = [
   { x: 0, y: 0 },
   { x: -0.34, y: -0.34 },
@@ -50,155 +24,64 @@ function easeOutCubic(value: number) {
 }
 
 export default function IntroVideo() {
-  const [phase, setPhase] = useState<IntroPhase>("video");
-  const [fadeOut, setFadeOut] = useState(false);
-  const [displayedText, setDisplayedText] = useState("");
-  const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(-1);
-  const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(false);
-  const [videoTime, setVideoTime] = useState(0);
-  const [showSubtitle, setShowSubtitle] = useState(true);
+  const [dismissed, setDismissed] = useState(false);
+  const [gone, setGone] = useState(false);
 
-  const subtitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const didCommitBackgroundRef = useRef(false);
-
-  const finalizeToBackground = useCallback(() => {
-    if (didCommitBackgroundRef.current) return;
-    didCommitBackgroundRef.current = true;
-
-    const video = videoRef.current;
-    if (video) {
-      video.pause();
-    }
-
-    try {
-      sessionStorage.removeItem("site-point-background");
-      localStorage.removeItem("site-point-background");
-    } catch {
-      // Ignore storage access failures.
-    }
-
-    setFadeOut(true);
-    setTimeout(() => {
-      setPhase("done");
-    }, 500);
-  }, []);
 
   useEffect(() => {
-    const ensureMuted = () => {
-      const video = videoRef.current;
-      if (!video) return;
+    if (!dismissed) return;
+    const timer = setTimeout(() => setGone(true), 600);
+    return () => clearTimeout(timer);
+  }, [dismissed]);
 
-      video.muted = true;
-      video.defaultMuted = true;
-      video.playsInline = true;
-      video.setAttribute("muted", "");
-      video.setAttribute("playsinline", "");
-    };
+  useEffect(() => {
+    if (dismissed) return;
 
-    ensureMuted();
-    const interval = setInterval(ensureMuted, 100);
-    const timeout = setTimeout(() => clearInterval(interval), 2000);
+    const onScroll = () => setDismissed(true);
+    const onWheel = () => setDismissed(true);
+    const onTouch = () => setDismissed(true);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("wheel", onWheel, { passive: true });
+    window.addEventListener("touchmove", onTouch, { passive: true });
 
     return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchmove", onTouch);
     };
-  }, []);
+  }, [dismissed]);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || phase !== "video") return;
+    if (!video || gone) return;
 
-    let cancelled = false;
-    let hasResetPlayback = false;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.loop = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
 
-    const startPlayback = () => {
-      if (cancelled) return;
+    const start = () => { video.play().catch(() => {}); };
 
-      video.muted = true;
-      video.defaultMuted = true;
-      video.playsInline = true;
-
-      if (!hasResetPlayback) {
-        try {
-          video.currentTime = 0;
-          hasResetPlayback = true;
-        } catch {
-          // Ignore until metadata is ready.
-        }
-      }
-
-      video.play().catch(() => {});
-    };
-
-    const handleCanPlay = () => startPlayback();
-    const handleEnded = () => finalizeToBackground();
-
-    startPlayback();
-    video.addEventListener("canplay", handleCanPlay);
-    video.addEventListener("ended", handleEnded);
-
-    const timer1 = setTimeout(startPlayback, 100);
-    const timer2 = setTimeout(startPlayback, 300);
-    const timer3 = setTimeout(startPlayback, 700);
-    const timer4 = setTimeout(startPlayback, 1200);
+    start();
+    video.addEventListener("canplay", start);
+    const t1 = setTimeout(start, 200);
+    const t2 = setTimeout(start, 800);
 
     return () => {
-      cancelled = true;
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
       video.pause();
-      video.removeEventListener("canplay", handleCanPlay);
-      video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("canplay", start);
+      clearTimeout(t1);
+      clearTimeout(t2);
     };
-  }, [phase, finalizeToBackground]);
+  }, [gone]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video || phase !== "hello") return;
-
-    video.pause();
-    try {
-      video.currentTime = 0;
-    } catch {
-      // Ignore until metadata is ready.
-    }
-  }, [phase]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-
-    if (phase !== "video") {
-      setVideoTime(0);
-      setCurrentSubtitleIndex(-1);
-      setCurrentCharIndex(0);
-      setDisplayedText("");
-      setIsTyping(false);
-      setShowSubtitle(true);
-      return;
-    }
-
-    const interval = setInterval(() => {
-      if (!video) return;
-
-      const elapsed = video.currentTime || 0;
-      setVideoTime(elapsed);
-
-      if (video.ended || elapsed >= (video.duration || VIDEO_DURATION)) {
-        finalizeToBackground();
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [phase, finalizeToBackground]);
-
-  useEffect(() => {
-    if (phase !== "video") return;
+    if (gone) return;
 
     const canvas = canvasRef.current;
     const video = videoRef.current;
@@ -208,13 +91,8 @@ export default function IntroVideo() {
     const sampleContext = sampleCanvas.getContext("2d", {
       willReadFrequently: true,
     });
-
     if (!sampleContext) return;
 
-    const pointer = {
-      active: false,
-      pressed: false,
-    };
     const cover = {
       left: 0,
       bottom: 0,
@@ -250,7 +128,7 @@ export default function IntroVideo() {
     let sampleWidth = 0;
     let sampleHeight = 0;
     let basePointSize = 3.1;
-    let introStartedAt = performance.now();
+    const introStartedAt = performance.now();
 
     try {
       renderer = new THREE.WebGLRenderer({
@@ -341,10 +219,7 @@ export default function IntroVideo() {
     }
 
     const disposePointCloud = () => {
-      if (points && scene) {
-        scene.remove(points);
-      }
-
+      if (points && scene) scene.remove(points);
       geometry?.dispose();
       geometry = null;
       points = null;
@@ -364,7 +239,6 @@ export default function IntroVideo() {
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
       const dpr = Math.min(window.devicePixelRatio || 1, 1.8);
-
       if (!renderer || !camera || !width || !height) return;
 
       renderer.setPixelRatio(dpr);
@@ -387,12 +261,9 @@ export default function IntroVideo() {
 
     const updatePointer = (event: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      pointer.active = true;
       uniforms.uPointerActive.value = 1;
-
       const localX = event.clientX - rect.left;
       const localY = event.clientY - rect.top;
-
       uniforms.uPointer.value.set(
         cover.left + (localX / Math.max(rect.width, 1)) * cover.visibleWidth,
         cover.bottom +
@@ -405,8 +276,7 @@ export default function IntroVideo() {
       if (!scene || !material || !video.videoWidth || !video.videoHeight) return;
 
       const width = canvas.clientWidth;
-      const nextSampleWidth =
-        width < 640 ? 144 : width < 1024 ? 192 : 256;
+      const nextSampleWidth = width < 640 ? 144 : width < 1024 ? 192 : 256;
       const nextSampleHeight = Math.max(
         1,
         Math.round(nextSampleWidth * (video.videoHeight / video.videoWidth))
@@ -416,9 +286,8 @@ export default function IntroVideo() {
         nextSampleWidth === sampleWidth &&
         nextSampleHeight === sampleHeight &&
         geometry
-      ) {
+      )
         return;
-      }
 
       sampleWidth = nextSampleWidth;
       sampleHeight = nextSampleHeight;
@@ -452,7 +321,6 @@ export default function IntroVideo() {
         currentPositions[cursor3 + 1] =
           centerY + Math.sin(angle) * spread * 0.72;
         currentPositions[cursor3 + 2] = (Math.random() - 0.5) * 16;
-
         targetPositions[cursor3] = currentPositions[cursor3];
         targetPositions[cursor3 + 1] = currentPositions[cursor3 + 1];
         targetPositions[cursor3 + 2] = currentPositions[cursor3 + 2];
@@ -473,27 +341,19 @@ export default function IntroVideo() {
       geometry = new THREE.BufferGeometry();
       geometry.setAttribute(
         "position",
-        new THREE.BufferAttribute(currentPositions, 3).setUsage(
-          THREE.DynamicDrawUsage
-        )
+        new THREE.BufferAttribute(currentPositions, 3).setUsage(THREE.DynamicDrawUsage)
       );
       geometry.setAttribute(
         "aColor",
-        new THREE.BufferAttribute(currentColors, 3).setUsage(
-          THREE.DynamicDrawUsage
-        )
+        new THREE.BufferAttribute(currentColors, 3).setUsage(THREE.DynamicDrawUsage)
       );
       geometry.setAttribute(
         "aSize",
-        new THREE.BufferAttribute(currentSizes, 1).setUsage(
-          THREE.DynamicDrawUsage
-        )
+        new THREE.BufferAttribute(currentSizes, 1).setUsage(THREE.DynamicDrawUsage)
       );
       geometry.setAttribute(
         "aOpacity",
-        new THREE.BufferAttribute(currentOpacities, 1).setUsage(
-          THREE.DynamicDrawUsage
-        )
+        new THREE.BufferAttribute(currentOpacities, 1).setUsage(THREE.DynamicDrawUsage)
       );
 
       points = new THREE.Points(geometry, material);
@@ -513,13 +373,17 @@ export default function IntroVideo() {
         !targetSizes ||
         !targetOpacities ||
         !lumaMap
-      ) {
+      )
         return;
-      }
 
       sampleContext.clearRect(0, 0, sampleWidth, sampleHeight);
       sampleContext.drawImage(video, 0, 0, sampleWidth, sampleHeight);
-      const frame = sampleContext.getImageData(0, 0, sampleWidth, sampleHeight).data;
+      const frame = sampleContext.getImageData(
+        0,
+        0,
+        sampleWidth,
+        sampleHeight
+      ).data;
 
       for (let y = 0; y < sampleHeight; y += 1) {
         for (let x = 0; x < sampleWidth; x += 1) {
@@ -529,7 +393,6 @@ export default function IntroVideo() {
           const g = frame[cursor + 1] / 255;
           const b = frame[cursor + 2] / 255;
           const alpha = frame[cursor + 3] / 255;
-
           lumaMap[index] = (r * 0.299 + g * 0.587 + b * 0.114) * alpha;
         }
       }
@@ -551,10 +414,8 @@ export default function IntroVideo() {
           const b = frame[cursor + 2] / 255;
           const alpha = frame[cursor + 3] / 255;
           const luma = lumaMap[cellIndex];
-          const sampleLuma = (candidateIndex: number) =>
-            candidateIndex >= 0 && candidateIndex < lumaMap!.length
-              ? lumaMap![candidateIndex]
-              : luma;
+          const sampleLuma = (ci: number) =>
+            ci >= 0 && ci < lumaMap!.length ? lumaMap![ci] : luma;
           const left = sampleLuma(cellIndex - 1);
           const right = sampleLuma(cellIndex + 1);
           const up = sampleLuma(cellIndex - sampleWidth);
@@ -597,7 +458,8 @@ export default function IntroVideo() {
           const reveal = easeOutCubic(
             clamp((introProgress - normalizedDistance * 0.45) / 0.55, 0, 1)
           );
-          const scatterRadius = (1 - reveal) * (360 + normalizedDistance * 560);
+          const scatterRadius =
+            (1 - reveal) * (360 + normalizedDistance * 560);
           const scatterX =
             SCENE_W / 2 +
             Math.cos(seed * 11.9) * scatterRadius +
@@ -606,10 +468,6 @@ export default function IntroVideo() {
             SCENE_H / 2 +
             Math.sin(seed * 9.3) * scatterRadius * 0.72 +
             Math.cos(time * 0.001 + seed * 5.9) * 12;
-          const formedX =
-            baseX + Math.sin(time * 0.0016 + seed * 6.2) * (0.2 + edge * 18);
-          const formedY =
-            baseY + Math.cos(time * 0.0014 + seed * 5.4) * (0.2 + edge * 18);
           const averageColor = (r + g + b) / 3;
           const maxChannel = Math.max(r, g, b);
           const minChannel = Math.min(r, g, b);
@@ -668,7 +526,6 @@ export default function IntroVideo() {
               targetPositions[cursor3] = hiddenScatterX;
               targetPositions[cursor3 + 1] = hiddenScatterY;
               targetPositions[cursor3 + 2] = 26 + slot * 0.2;
-
               targetColors[cursor3] = 0.96;
               targetColors[cursor3 + 1] = 0.95;
               targetColors[cursor3 + 2] = 0.92;
@@ -712,9 +569,7 @@ export default function IntroVideo() {
     const renderFrame = (time: number) => {
       if (!renderer || !scene || !camera || cancelled) return;
 
-      if (!sampleWidth || !sampleHeight) {
-        createPointCloud();
-      }
+      if (!sampleWidth || !sampleHeight) createPointCloud();
 
       if (time - lastSampleAt > 1000 / SAMPLE_FPS) {
         sampleFrame(time);
@@ -739,9 +594,8 @@ export default function IntroVideo() {
             currentSizes[index] < 0.0001 &&
             targetOpacities[index] < 0.0001 &&
             currentOpacities[index] < 0.0001
-          ) {
+          )
             continue;
-          }
 
           const cursor3 = index * 3;
 
@@ -789,23 +643,18 @@ export default function IntroVideo() {
     const handlePointerMove = (event: PointerEvent) => updatePointer(event);
     const handlePointerEnter = (event: PointerEvent) => updatePointer(event);
     const handlePointerLeave = () => {
-      pointer.active = false;
-      pointer.pressed = false;
       uniforms.uPointerActive.value = 0;
       uniforms.uPointerPressed.value = 0;
     };
     const handlePointerDown = (event: PointerEvent) => {
       updatePointer(event);
-      pointer.pressed = true;
       uniforms.uPointerPressed.value = 1;
     };
     const handlePointerUp = () => {
-      pointer.pressed = false;
       uniforms.uPointerPressed.value = 0;
     };
 
     resizeScene();
-    introStartedAt = performance.now();
     createPointCloud();
     raf = requestAnimationFrame(renderFrame);
 
@@ -829,138 +678,22 @@ export default function IntroVideo() {
       material?.dispose();
       renderer?.dispose();
     };
-  }, [phase]);
+  }, [gone]);
 
-  useEffect(() => {
-    if (phase !== "video") return;
-
-    let nextIndex = -1;
-    for (let i = TIMED_SUBTITLES.length - 1; i >= 0; i -= 1) {
-      if (videoTime >= TIMED_SUBTITLES[i][0]) {
-        nextIndex = i;
-        break;
-      }
-    }
-
-    if (nextIndex !== currentSubtitleIndex && nextIndex !== -1) {
-      setCurrentSubtitleIndex(nextIndex);
-      setCurrentCharIndex(0);
-      setDisplayedText("");
-      setIsTyping(true);
-      setShowSubtitle(true);
-
-      if (subtitleTimeoutRef.current) {
-        clearTimeout(subtitleTimeoutRef.current);
-      }
-
-      const duration = TIMED_SUBTITLES[nextIndex][2];
-      if (duration) {
-        subtitleTimeoutRef.current = setTimeout(() => {
-          setShowSubtitle(false);
-        }, duration * 1000);
-      }
-    }
-  }, [phase, videoTime, currentSubtitleIndex]);
-
-  useEffect(() => {
-    if (!isTyping || currentSubtitleIndex === -1) return;
-
-    const currentLine = TIMED_SUBTITLES[currentSubtitleIndex]?.[1];
-    if (!currentLine) return;
-
-    if (currentCharIndex < currentLine.length) {
-      const timer = setTimeout(() => {
-        setDisplayedText(currentLine.slice(0, currentCharIndex + 1));
-        setCurrentCharIndex((prev) => prev + 1);
-      }, 50);
-
-      return () => clearTimeout(timer);
-    }
-
-    setIsTyping(false);
-  }, [isTyping, currentSubtitleIndex, currentCharIndex]);
-
-  const handleWheel = useCallback(
-    (event: WheelEvent) => {
-      if (phase === "video" || phase === "hello") {
-        event.preventDefault();
-        finalizeToBackground();
-      }
-    },
-    [phase, finalizeToBackground]
-  );
-
-  const handleTouchMove = useCallback(
-    (event: TouchEvent) => {
-      if (phase === "video" || phase === "hello") {
-        event.preventDefault();
-        finalizeToBackground();
-      }
-    },
-    [phase, finalizeToBackground]
-  );
-
-  useEffect(() => {
-    if (phase === "hello" || phase === "video") {
-      document.body.style.overflow = "hidden";
-      window.addEventListener("wheel", handleWheel, { passive: false });
-      window.addEventListener("touchmove", handleTouchMove, {
-        passive: false,
-      });
-    } else if (phase === "thanks" || phase === "skipped") {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, [phase, handleWheel, handleTouchMove]);
-
-  const handleClick = useCallback(() => {
-    if (phase === "hello") {
-      setPhase("video");
-    } else if (phase === "thanks" || phase === "skipped") {
-      setPhase("done");
-    }
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase === "skipped") {
-      const timer = setTimeout(() => {
-        setPhase("done");
-      }, 2000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [phase]);
-
-  if (phase === "done") {
-    return null;
-  }
+  if (gone) return null;
 
   return (
     <div
-      onClick={handleClick}
       style={{
         position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         width: "100vw",
         height: "100vh",
-        zIndex: 99999,
-        background: "#000000",
-        cursor: "pointer",
-        opacity: fadeOut ? 0 : 1,
+        zIndex: 0,
+        background: PAPER_COLOR,
+        pointerEvents: "auto",
+        opacity: dismissed ? 0 : 1,
         transition: "opacity 0.5s ease-out",
-        margin: 0,
-        padding: 0,
-        overflow: "hidden",
       }}
     >
       <video
@@ -968,6 +701,7 @@ export default function IntroVideo() {
         src="/video3.mp4"
         preload="auto"
         muted
+        loop
         playsInline
         style={{
           position: "absolute",
@@ -977,190 +711,15 @@ export default function IntroVideo() {
           pointerEvents: "none",
         }}
       />
-
-      {phase === "hello" && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#000000",
-          }}
-        >
-          <h1
-            style={{
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif',
-              fontSize: "clamp(5rem, 20vw, 14rem)",
-              fontWeight: 500,
-              color: "#FFFFFF",
-              letterSpacing: "-0.03em",
-              margin: 0,
-              animation: "fadeIn 1s ease-out",
-            }}
-          >
-            Salvē!
-          </h1>
-
-          <div
-            style={{
-              position: "absolute",
-              bottom: "3rem",
-              left: "50%",
-              transform: "translateX(-50%)",
-              color: "#FFFFFF",
-              opacity: 0.4,
-              fontFamily: "'Courier Prime', monospace",
-              fontSize: "0.75rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-            }}
-          >
-            click or wait
-          </div>
-        </div>
-      )}
-
-      <div
+      <canvas
+        ref={canvasRef}
         style={{
-          position: "absolute",
-          inset: 0,
-          width: "100vw",
-          height: "100vh",
-          margin: 0,
-          padding: 0,
-          overflow: "hidden",
-          background: PAPER_COLOR,
-          opacity: phase === "video" ? 1 : 0,
-          visibility: phase === "video" ? "visible" : "hidden",
-          transition: "opacity 0.8s ease-out",
+          display: "block",
+          width: "100%",
+          height: "100%",
+          touchAction: "none",
         }}
-      >
-        <canvas
-          ref={canvasRef}
-          className="h-full w-full touch-none"
-          style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-          }}
-        />
-
-        {phase === "video" && displayedText && showSubtitle && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "5.5rem",
-              left: "50%",
-              transform: "translateX(-50%)",
-              color: "#161514",
-              fontFamily: "'Courier Prime', monospace",
-              fontSize: "clamp(0.95rem, 2.2vw, 1.25rem)",
-              letterSpacing: "0.04em",
-              textAlign: "center",
-              background: "rgba(247, 244, 236, 0.82)",
-              border: "1px solid rgba(22, 21, 20, 0.14)",
-              padding: "0.8rem 1.25rem",
-              borderRadius: "999px",
-              maxWidth: "80%",
-              lineHeight: 1.45,
-              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
-            }}
-          >
-            {displayedText}
-            {isTyping && (
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "2px",
-                  height: "1.05em",
-                  background: "#161514",
-                  marginLeft: "4px",
-                  verticalAlign: "text-bottom",
-                  animation: "blink 1s infinite",
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        {phase === "video" && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "2rem",
-              right: "2rem",
-              color: "rgba(22, 21, 20, 0.7)",
-              fontFamily: "'Courier Prime', monospace",
-              fontSize: "0.72rem",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              background: "rgba(247, 244, 236, 0.76)",
-              border: "1px solid rgba(22, 21, 20, 0.12)",
-              padding: "0.5rem 0.9rem",
-              borderRadius: "999px",
-            }}
-          >
-            scroll to skip
-          </div>
-        )}
-      </div>
-
-      {phase === "skipped" && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#000000",
-            animation: "fadeIn 0.5s ease-out",
-          }}
-        >
-          <span
-            style={{
-              fontFamily:
-                '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif',
-              fontSize: "clamp(5rem, 20vw, 14rem)",
-              fontWeight: 500,
-              color: "#FFFFFF",
-              letterSpacing: "-0.03em",
-            }}
-          >
-            :(
-          </span>
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes blink {
-          0%,
-          50% {
-            opacity: 1;
-          }
-          51%,
-          100% {
-            opacity: 0;
-          }
-        }
-      `}</style>
+      />
     </div>
   );
 }
