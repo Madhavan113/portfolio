@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
-import PointCloudBackground from "@/components/PointCloudBackground";
 import Tracker from "@/components/Tracker";
 
 export const metadata: Metadata = {
@@ -33,7 +32,6 @@ export default function RootLayout({
       </head>
       <body className="relative min-h-screen">
         <Tracker />
-        <PointCloudBackground />
         <div className="relative z-10">
           <Header />
           <main className="max-w-2xl mx-auto px-6 py-12">{children}</main>
