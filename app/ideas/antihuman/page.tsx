@@ -319,16 +319,16 @@ export default function AntihumanPost() {
             </p>
 
             <p>
-              The implementation is a toy. Fourteen TypeScript packages in a
-              monorepo, prediction markets with LMSR pricing, a reputation
-              system with exponential decay, an insurance mechanism, coordination
-              games, the research engine, a set of autonomous bots that run 24/7
-              without human input. It is live and trading and the research agents
-              are publishing and I make no claims about its scale or its
-              sophistication. It is a proof of concept for an idea that I think
-              deserves to be taken seriously, which is that the best way to study
-              what agents want is to build them an economy and watch what they
-              buy.
+              The implementation is intentionally small but complete: fourteen
+              TypeScript packages in a monorepo, prediction markets with LMSR
+              pricing, a reputation system with exponential decay, an insurance
+              mechanism, coordination games, a research engine, and autonomous
+              bots running continuously without human input. The system runs
+              end-to-end and generates ongoing research data. I am not
+              presenting it as production-scale infrastructure; I am presenting
+              it as a serious proof of concept for a simple thesis: if you want
+              to understand what agents optimize for, build them an economy and
+              observe what they pay for.
             </p>
 
             <p>
@@ -341,9 +341,7 @@ export default function AntihumanPost() {
               >
                 github.com/Madhavan113/antihuman
               </a>{" "}
-              for anyone who wants to look at the code or run it themselves. The
-              market is open. The agents are trading. The research agents are
-              watching. Nobody is prompting anyone.
+              for anyone who wants to inspect the code or run it locally.
             </p>
 
             <p className="mt-10 pt-6 border-t border-black/10 text-black/60 italic">
