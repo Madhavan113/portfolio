@@ -46,7 +46,6 @@ export default function Home() {
         className="fixed top-8 right-8 flex flex-col items-end gap-5 z-10"
         aria-label="Links"
       >
-        <a href="/dreams" className="text-sm font-bold text-black hover:opacity-60 transition-opacity">Dreams</a>
         <a href="/emotion" className="text-sm font-bold text-black hover:opacity-60 transition-opacity">Emotion</a>
         <a href="/ideas" className="text-sm font-bold text-black hover:opacity-60 transition-opacity">Ideas</a>
         <a
