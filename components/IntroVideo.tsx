@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 const SCENE_W = 1920;
@@ -24,39 +24,12 @@ function easeOutCubic(value: number) {
 }
 
 export default function IntroVideo() {
-  const [dismissed, setDismissed] = useState(false);
-  const [gone, setGone] = useState(false);
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    if (!dismissed) return;
-    const timer = setTimeout(() => setGone(true), 600);
-    return () => clearTimeout(timer);
-  }, [dismissed]);
-
-  useEffect(() => {
-    if (dismissed) return;
-
-    const onScroll = () => setDismissed(true);
-    const onWheel = () => setDismissed(true);
-    const onTouch = () => setDismissed(true);
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("wheel", onWheel, { passive: true });
-    window.addEventListener("touchmove", onTouch, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchmove", onTouch);
-    };
-  }, [dismissed]);
-
-  useEffect(() => {
     const video = videoRef.current;
-    if (!video || gone) return;
+    if (!video) return;
 
     video.muted = true;
     video.defaultMuted = true;
@@ -78,11 +51,9 @@ export default function IntroVideo() {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [gone]);
+  }, []);
 
   useEffect(() => {
-    if (gone) return;
-
     const canvas = canvasRef.current;
     const video = videoRef.current;
     if (!canvas || !video) return;
@@ -678,9 +649,7 @@ export default function IntroVideo() {
       material?.dispose();
       renderer?.dispose();
     };
-  }, [gone]);
-
-  if (gone) return null;
+  }, []);
 
   return (
     <div
@@ -692,8 +661,6 @@ export default function IntroVideo() {
         zIndex: 0,
         background: PAPER_COLOR,
         pointerEvents: "auto",
-        opacity: dismissed ? 0 : 1,
-        transition: "opacity 0.5s ease-out",
       }}
     >
       <video

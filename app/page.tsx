@@ -19,36 +19,36 @@ export default function Home() {
 
           <div className="space-y-8 text-[1.05rem] leading-[1.75] max-w-2xl font-bold text-black">
             <p>
-              I&rsquo;m interested in understanding myself.
+              I want to learn more from you.
             </p>
 
             <p>
               My website&rsquo;s content is contradictory and often incorrect.
               That&rsquo;s the point. If you disagree with anything I write,
-              feel free to reach out&mdash;I believe disagreement is the highest
+              feel free to reach out. I believe disagreement is the highest
               form of respect.
             </p>
 
             <div className="pt-2">
               <p className="mb-3">Some of my interests:</p>
               <ol className="list-none space-y-1 pl-4">
-                <li>1. Purpose, Information Theory, Assemblages</li>
-                <li>2. Inference, Agent Memory, Financial Systems</li>
+                <li>1. Poker, Games, Incentive-Based Environments</li>
+                <li>2. RL Agents, Computer Use Models, Optimization</li>
+                <li>3. Financial Markets</li>
+                <li>4. Philosophy of Purpose</li>
               </ol>
             </div>
-
-            <p className="pt-2 text-black/70 italic">
-              My biggest weakness is I&rsquo;m unserious, deeply depersonal,
-              and authentically inauthentic.
-            </p>
           </div>
         </div>
       </main>
 
       <nav
-        className="fixed top-8 right-8 flex flex-col gap-5 z-10"
-        aria-label="Social links"
+        className="fixed top-8 right-8 flex flex-col items-end gap-5 z-10"
+        aria-label="Links"
       >
+        <a href="/dreams" className="text-sm font-bold text-black hover:opacity-60 transition-opacity">Dreams</a>
+        <a href="/emotion" className="text-sm font-bold text-black hover:opacity-60 transition-opacity">Emotion</a>
+        <a href="/ideas" className="text-sm font-bold text-black hover:opacity-60 transition-opacity">Ideas</a>
         <a
           href="https://x.com/madteryx"
           target="_blank"
