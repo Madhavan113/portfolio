@@ -42,7 +42,7 @@ export default function LazySundayPost() {
               completely immersed myself in escapism and addiction to fuel my
               narcissistic fantasies of grandiosity, but on Sunday, the humble
               reality of my true laziness hits. In reality, I&rsquo;m not very
-              smart, not very hardworking, and, to be honest, not very likeable.
+              smart, not very hardworking.
               I feel that I pursue meaningless things not to feel something, but
               rather to not feel the other.
             </p>
