@@ -43,6 +43,7 @@ export default function SecretPage() {
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [refreshError, setRefreshError] = useState("");
   const [authToken, setAuthToken] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
@@ -64,36 +65,46 @@ export default function SecretPage() {
     return () => clearInterval(interval);
   }, [stage, authToken]);
 
-  // Initialize map when leaflet is loaded and we have visits
+  // Keep map instance in sync with latest visits.
   useEffect(() => {
-    if (leafletLoaded && visits.length > 0 && mapRef.current && !mapInstanceRef.current) {
-      const L = (window as any).L;
-      if (!L) return;
+    if (!leafletLoaded || !mapRef.current) return;
 
+    const L = (window as any).L;
+    if (!L) return;
+
+    if (!mapInstanceRef.current) {
       const map = L.map(mapRef.current).setView([20, 0], 2);
       L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
         attribution: "© OpenStreetMap contributors © CARTO",
       }).addTo(map);
-
-      visits.forEach((v) => {
-        if (v.location?.lat && v.location?.lon) {
-          L.circleMarker([v.location.lat, v.location.lon], {
-            radius: 6,
-            fillColor: "#888888",
-            color: "#FFFFFF",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8,
-          })
-            .bindPopup(
-              `<b>${escapeHtml(v.location.city)}, ${escapeHtml(v.location.country)}</b><br>${escapeHtml(v.page)}<br><small>${escapeHtml(new Date(v.timestamp).toLocaleString())}</small>`
-            )
-            .addTo(map);
-        }
-      });
-
       mapInstanceRef.current = map;
     }
+
+    const map = mapInstanceRef.current;
+    if ((map as any)._visitLayer) {
+      (map as any)._visitLayer.remove();
+    }
+
+    const visitLayer = L.layerGroup();
+    visits.forEach((v) => {
+      if (v.location?.lat != null && v.location?.lon != null) {
+        L.circleMarker([v.location.lat, v.location.lon], {
+          radius: 6,
+          fillColor: "#888888",
+          color: "#FFFFFF",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.8,
+        })
+          .bindPopup(
+            `<b>${escapeHtml(v.location.city)}, ${escapeHtml(v.location.country)}</b><br>${escapeHtml(v.page)}<br><small>${escapeHtml(new Date(v.timestamp).toLocaleString())}</small>`
+          )
+          .addTo(visitLayer);
+      }
+    });
+
+    visitLayer.addTo(map);
+    (map as any)._visitLayer = visitLayer;
   }, [leafletLoaded, visits]);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -134,6 +145,7 @@ export default function SecretPage() {
         setAuthToken(data.token);
         setStage("dashboard");
         setError("");
+        setRefreshError("");
         setVisits(data.visits || []);
         setLastUpdate(new Date());
       } else {
@@ -160,10 +172,14 @@ export default function SecretPage() {
         const data = await res.json();
         setVisits(data.visits || []);
         setLastUpdate(new Date());
+        setRefreshError("");
+      } else {
+        const data = await res.json().catch(() => null);
+        setRefreshError(data?.error || "Failed to refresh analytics");
       }
     } catch (e) {
-      // Silently fail on background refresh
-      if (!isBackgroundRefresh) console.error(e);
+      console.error(e);
+      setRefreshError("Network error while refreshing analytics");
     }
     if (!isBackgroundRefresh) setLoading(false);
   };
@@ -266,20 +282,37 @@ export default function SecretPage() {
               </p>
             )}
           </div>
-          <button
-            onClick={() => {
-              setStage("password");
-              setPassword("");
-              setSecurityAnswer("");
-              setAuthToken("");
-              setCurrentPage(1);
-              mapInstanceRef.current = null;
-            }}
-            className="text-[var(--color-gold)] hover:text-[var(--color-charcoal)]"
-          >
-            Lock
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => fetchAnalytics(true)}
+              className="text-[var(--color-gold)] hover:text-[var(--color-charcoal)]"
+            >
+              Refresh
+            </button>
+            <button
+              onClick={() => {
+                setStage("password");
+                setPassword("");
+                setSecurityAnswer("");
+                setAuthToken("");
+                setCurrentPage(1);
+                setRefreshError("");
+                if (mapInstanceRef.current) {
+                  mapInstanceRef.current.remove();
+                  mapInstanceRef.current = null;
+                }
+              }}
+              className="text-[var(--color-gold)] hover:text-[var(--color-charcoal)]"
+            >
+              Lock
+            </button>
+          </div>
         </div>
+        {refreshError && (
+          <p className="text-sm text-red-600">
+            {refreshError}
+          </p>
+        )}
 
         {loading ? (
           <p>Loading analytics...</p>

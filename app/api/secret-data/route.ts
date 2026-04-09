@@ -9,7 +9,13 @@ export const revalidate = 0;
 // Server-side only - these are NEVER exposed to client
 const SECRET_PASSWORD = process.env.SECRET_PASSWORD || "defaultpassword123";
 const SECRET_ANSWER = process.env.SECRET_ANSWER || "defaultanswer";
-const TOKEN_SECRET = process.env.TOKEN_SECRET || crypto.randomBytes(32).toString("hex");
+// Keep token signing stable even when TOKEN_SECRET is not set (e.g. across serverless instances).
+const TOKEN_SECRET =
+  process.env.TOKEN_SECRET ||
+  crypto
+    .createHash("sha256")
+    .update(`${SECRET_PASSWORD}:${SECRET_ANSWER}:portfolio-secret-fallback`)
+    .digest("hex");
 
 // Simple token generation (expires in 1 hour)
 function generateToken(): string {
