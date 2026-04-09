@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Tracker from "@/components/Tracker";
 
 export const metadata: Metadata = {
   title: "Madhavan Prasanna",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Tracker />
+        {children}
+      </body>
     </html>
   );
 }
