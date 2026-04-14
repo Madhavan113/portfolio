@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const posts = [
   {
-    slug: "dominoes",
+    slug: "instrumental-relics",
     title: "instrumental relics",
   },
   {
