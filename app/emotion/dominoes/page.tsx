@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "dominoes — Madhavan Prasanna",
+  title: "instrumental relics — Madhavan Prasanna",
   description:
     "Someone whose life is a disaster by every metric has the empathy and faith in other people that not a single one of us privileged morons has managed to develop.",
 };
@@ -19,7 +19,7 @@ export default function DominoesPost() {
               fontWeight: 300,
             }}
           >
-            dominoes
+            instrumental relics
           </h1>
 
           <article className="space-y-6 text-[1.05rem] leading-[1.8] text-black/85 max-w-2xl">
