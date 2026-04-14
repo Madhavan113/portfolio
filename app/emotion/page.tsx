@@ -2,6 +2,10 @@ import Link from "next/link";
 
 const posts = [
   {
+    slug: "i-might",
+    title: "i might",
+  },
+  {
     slug: "lazy-sunday",
     title: "Lazy Sunday Morning",
     lede: "Claude fix this post i'm too lazyy to write it.",
@@ -32,9 +36,11 @@ export default function EmotionPage() {
               <h2 className="text-2xl font-bold text-black leading-tight mb-2 group-hover:opacity-60 transition-opacity">
                 {post.title}
               </h2>
-              <p className="text-[0.95rem] leading-[1.7] text-black/60">
-                {post.lede}
-              </p>
+              {post.lede ? (
+                <p className="text-[0.95rem] leading-[1.7] text-black/60">
+                  {post.lede}
+                </p>
+              ) : null}
             </Link>
           ))}
         </div>
