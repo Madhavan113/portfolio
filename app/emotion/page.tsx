@@ -2,6 +2,11 @@ import Link from "next/link";
 
 const posts = [
   {
+    slug: "spiccato",
+    title: "spiccato",
+    lede: "explanatory.",
+  },
+  {
     slug: "instrumental-relics",
     title: "instrumental relics",
   },
