@@ -40,3 +40,19 @@ textarea,
 select {
   font: inherit;
 }
+
+.intro-video-wash {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(255, 255, 255, 0.62) 38%,
+    rgba(255, 255, 255, 0.06) 68%,
+    rgba(255, 255, 255, 0) 82%
+  );
+}
+
+@media (max-width: 767px) {
+  .intro-video-wash {
+    background: rgba(255, 255, 255, 0.72);
+  }
+}

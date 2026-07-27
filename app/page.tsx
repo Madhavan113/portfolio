@@ -19,34 +19,18 @@ export default function Home() {
 
           <div className="space-y-8 text-[1.05rem] leading-[1.75] max-w-2xl font-bold text-black">
             <p>
-              I want to learn more from you.
+              I have previously worked on a financial exchange for physical
+              infrastructure backed by a16z Speedrun, worked on network
+              infrastructure at Google, and a few other tech companies.
             </p>
-
-            <p>
-              My website&rsquo;s content is contradictory and often incorrect.
-              That&rsquo;s the point. If you disagree with anything I write,
-              feel free to reach out. I believe disagreement is the highest
-              form of respect.
-            </p>
-
-            <div className="pt-2">
-              <p className="mb-3">Some of my interests:</p>
-              <ol className="list-none space-y-1 pl-4">
-                <li>1. Poker, Games, Incentive-Based Environments</li>
-                <li>2. RL Agents, Computer Use Models, Optimization</li>
-                <li>3. Financial Markets</li>
-                <li>4. Philosophy of Purpose</li>
-              </ol>
-            </div>
           </div>
         </div>
       </main>
 
       <nav
-        className="fixed top-8 right-8 flex flex-col items-end gap-5 z-10"
+        className="fixed bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-5 rounded-full border border-black/10 bg-white/85 px-4 py-3 shadow-sm backdrop-blur-sm md:bottom-auto md:left-auto md:right-8 md:top-8 md:translate-x-0 md:flex-col md:items-end md:gap-5 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0"
         aria-label="Links"
       >
-        <a href="/emotion" className="text-sm font-bold text-black hover:opacity-60 transition-opacity">Emotion</a>
         <a href="/ideas" className="text-sm font-bold text-black hover:opacity-60 transition-opacity">Ideas</a>
         <a
           href="https://x.com/madteryx"
